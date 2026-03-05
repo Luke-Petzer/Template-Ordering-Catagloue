@@ -1,4 +1,4 @@
-// Supabase client for use inside Next.js middleware.
+// Supabase client for use inside Next.js proxy (previously middleware).
 // Reads/writes session cookies on the request/response objects directly.
 import { createServerClient } from "@supabase/ssr";
 import type { NextRequest, NextResponse } from "next/server";
