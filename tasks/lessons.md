@@ -5,6 +5,26 @@
 
 ---
 
+## Next.js 16 Breaking Changes
+
+- **`next lint` removed** — `next lint` is no longer a CLI command in Next.js 16. Use `eslint src` (or `npx eslint src`) directly in scripts and CI.
+
+- **`eslint-config-next` v16 exports flat config natively** — Do not use `FlatCompat`. Import directly: `import nextConfig from 'eslint-config-next'; export default [...nextConfig];`
+
+- **`middleware.ts` → `proxy.ts`** — The file convention and the exported function name both changed. The file must be `src/proxy.ts` and the exported function must be named `proxy` (not `middleware`).
+
+- **`experimental.typedRoutes` moved to `typedRoutes`** — In `next.config.ts`, this is now a top-level key, not under `experimental`.
+
+- **`next typegen` needed after adding routes** — When `typedRoutes: true`, run `npx next typegen` any time new routes are added, otherwise `redirect()` type-checks fail with `RouteImpl` errors.
+
+## Zod
+
+- **Zod v4: `.errors` renamed to `.issues`** — `ZodError` no longer has a `.errors` property. Use `zodError.issues[0].message` instead of `zodError.errors[0].message`.
+
+## Supabase TypeScript Types
+
+- **`Relationships` array required for column-select inference** — Without `Relationships: []` (or a populated array) on each table in the Database type, Supabase's column-select narrowing (e.g. `.select("id, role")`) resolves to `never`. Always include `Relationships` in every table definition.
+
 ## Auth
 
 - **Buyer JWT sub claim must equal profile.id** — Supabase's `auth.uid()` reads the `sub` claim from the JWT. For buyers, the custom JWT `sub` must be set to `profile.id` (not a fabricated value) so RLS policies using `auth.uid()` correctly isolate buyer data.
