@@ -166,3 +166,230 @@ function csvEsc(value: string): string {
   }
   return value;
 }
+
+// ---------------------------------------------------------------------------
+// createProductAction
+// ---------------------------------------------------------------------------
+
+export async function createProductAction(
+  formData: FormData
+): Promise<{ error: string } | { id: string }> {
+  await requireAdmin();
+
+  const sku = (formData.get("sku") as string).trim();
+  const name = (formData.get("name") as string).trim();
+  const description = (formData.get("description") as string | null)?.trim() ?? null;
+  const details = (formData.get("details") as string | null)?.trim() ?? null;
+  const priceRaw = parseFloat(formData.get("price") as string);
+  const categoryId = (formData.get("category_id") as string | null) || null;
+  const trackStock = formData.get("track_stock") === "true";
+  const stockQty = parseInt(formData.get("stock_qty") as string, 10) || 0;
+
+  if (!sku || !name || isNaN(priceRaw) || priceRaw < 0) {
+    return { error: "SKU, name, and a valid price are required." };
+  }
+
+  const { data, error } = await adminClient
+    .from("products")
+    .insert({
+      sku,
+      name,
+      description,
+      details,
+      price: priceRaw,
+      category_id: categoryId,
+      track_stock: trackStock,
+      stock_qty: stockQty,
+      is_active: true,
+    })
+    .select("id")
+    .single();
+
+  if (error) {
+    console.error("[admin] createProduct:", error.message);
+    if (error.code === "23505") return { error: "A product with this SKU already exists." };
+    return { error: "Failed to create product. Please try again." };
+  }
+
+  return { id: data.id };
+}
+
+// ---------------------------------------------------------------------------
+// updateProductAction
+// ---------------------------------------------------------------------------
+
+export async function updateProductAction(
+  formData: FormData
+): Promise<{ error: string } | void> {
+  await requireAdmin();
+
+  const id = formData.get("id") as string | null;
+  if (!id) return { error: "Missing product ID." };
+
+  const sku = (formData.get("sku") as string).trim();
+  const name = (formData.get("name") as string).trim();
+  const description = (formData.get("description") as string | null)?.trim() ?? null;
+  const details = (formData.get("details") as string | null)?.trim() ?? null;
+  const priceRaw = parseFloat(formData.get("price") as string);
+  const categoryId = (formData.get("category_id") as string | null) || null;
+  const trackStock = formData.get("track_stock") === "true";
+  const stockQty = parseInt(formData.get("stock_qty") as string, 10) || 0;
+  const isActive = formData.get("is_active") !== "false";
+
+  if (!sku || !name || isNaN(priceRaw) || priceRaw < 0) {
+    return { error: "SKU, name, and a valid price are required." };
+  }
+
+  const { error } = await adminClient
+    .from("products")
+    .update({
+      sku,
+      name,
+      description,
+      details,
+      price: priceRaw,
+      category_id: categoryId,
+      track_stock: trackStock,
+      stock_qty: stockQty,
+      is_active: isActive,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", id);
+
+  if (error) {
+    console.error("[admin] updateProduct:", error.message);
+    if (error.code === "23505") return { error: "A product with this SKU already exists." };
+    return { error: "Failed to update product. Please try again." };
+  }
+}
+
+// ---------------------------------------------------------------------------
+// toggleProductActiveAction
+// ---------------------------------------------------------------------------
+
+export async function toggleProductActiveAction(
+  formData: FormData
+): Promise<{ error: string } | void> {
+  await requireAdmin();
+
+  const id = formData.get("id") as string | null;
+  const isActive = formData.get("is_active") === "true";
+  if (!id) return { error: "Missing product ID." };
+
+  const { error } = await adminClient
+    .from("products")
+    .update({ is_active: isActive, updated_at: new Date().toISOString() })
+    .eq("id", id);
+
+  if (error) {
+    console.error("[admin] toggleProduct:", error.message);
+    return { error: "Failed to update product status." };
+  }
+}
+
+// ---------------------------------------------------------------------------
+// createClientAction
+// ---------------------------------------------------------------------------
+
+export async function createClientAction(
+  formData: FormData
+): Promise<{ error: string } | { id: string }> {
+  await requireAdmin();
+
+  const accountNumber = (formData.get("account_number") as string).trim();
+  const businessName = (formData.get("business_name") as string).trim();
+  const contactName = (formData.get("contact_name") as string).trim();
+  const email = (formData.get("email") as string | null)?.trim() || null;
+  const phone = (formData.get("phone") as string | null)?.trim() || null;
+  const role = formData.get("role") as "buyer_default" | "buyer_30_day";
+  const vatNumber = (formData.get("vat_number") as string | null)?.trim() || null;
+  const creditLimit = parseFloat(formData.get("credit_limit") as string) || null;
+  const termsDays = parseInt(formData.get("payment_terms_days") as string, 10) || null;
+  const notes = (formData.get("notes") as string | null)?.trim() || null;
+
+  if (!accountNumber || !businessName || !contactName) {
+    return { error: "Account number, business name, and contact name are required." };
+  }
+  if (!["buyer_default", "buyer_30_day"].includes(role)) {
+    return { error: "Invalid billing role." };
+  }
+
+  const { data, error } = await adminClient
+    .from("profiles")
+    .insert({
+      account_number: accountNumber,
+      business_name: businessName,
+      contact_name: contactName,
+      email,
+      phone,
+      role,
+      vat_number: vatNumber,
+      credit_limit: creditLimit,
+      payment_terms_days: termsDays,
+      notes,
+      is_active: true,
+    })
+    .select("id")
+    .single();
+
+  if (error) {
+    console.error("[admin] createClient:", error.message);
+    if (error.code === "23505") return { error: "A client with this account number already exists." };
+    return { error: "Failed to create client. Please try again." };
+  }
+
+  return { id: data.id };
+}
+
+// ---------------------------------------------------------------------------
+// updateClientAction
+// ---------------------------------------------------------------------------
+
+export async function updateClientAction(
+  formData: FormData
+): Promise<{ error: string } | void> {
+  await requireAdmin();
+
+  const id = formData.get("id") as string | null;
+  if (!id) return { error: "Missing client ID." };
+
+  const accountNumber = (formData.get("account_number") as string).trim();
+  const businessName = (formData.get("business_name") as string).trim();
+  const contactName = (formData.get("contact_name") as string).trim();
+  const email = (formData.get("email") as string | null)?.trim() || null;
+  const phone = (formData.get("phone") as string | null)?.trim() || null;
+  const role = formData.get("role") as "buyer_default" | "buyer_30_day";
+  const vatNumber = (formData.get("vat_number") as string | null)?.trim() || null;
+  const creditLimit = parseFloat(formData.get("credit_limit") as string) || null;
+  const termsDays = parseInt(formData.get("payment_terms_days") as string, 10) || null;
+  const notes = (formData.get("notes") as string | null)?.trim() || null;
+  const isActive = formData.get("is_active") !== "false";
+
+  if (!accountNumber || !businessName || !contactName) {
+    return { error: "Account number, business name, and contact name are required." };
+  }
+
+  const { error } = await adminClient
+    .from("profiles")
+    .update({
+      account_number: accountNumber,
+      business_name: businessName,
+      contact_name: contactName,
+      email,
+      phone,
+      role,
+      vat_number: vatNumber,
+      credit_limit: creditLimit,
+      payment_terms_days: termsDays,
+      notes,
+      is_active: isActive,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", id);
+
+  if (error) {
+    console.error("[admin] updateClient:", error.message);
+    if (error.code === "23505") return { error: "A client with this account number already exists." };
+    return { error: "Failed to update client. Please try again." };
+  }
+}
