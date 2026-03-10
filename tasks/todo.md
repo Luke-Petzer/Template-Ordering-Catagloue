@@ -64,64 +64,123 @@
 
 ---
 
+## Design System (Superdesign — Project 2925902b)
+> Reference designs fetched. Implement consistently across all buyer-facing pages.
+
+### Design Tokens
+- **Font**: Inter (400/500/600/700) — add to `layout.tsx` via Google Fonts
+- **Primary**: `#0f172a` (slate-900) — buttons, active states, logo bg
+- **Background**: `#ffffff` / `#fafafa` / `#fcfcfc` (white with subtle tints)
+- **Border**: `border-gray-100` throughout
+- **Muted text**: `text-gray-500` (body), `text-gray-400` (labels/placeholders)
+- **Table headers**: `text-[11px] font-semibold text-gray-400 uppercase tracking-wider`
+- **Nav height**: `h-[64px]`, sticky top, `border-b border-gray-100 bg-white`
+- **Active nav**: underline `::after` 2px `bg-slate-900`, offset below nav
+- **Button primary**: `bg-slate-900 text-white rounded hover:bg-slate-800`
+- **Button secondary**: `bg-gray-100 text-gray-700 rounded hover:bg-gray-200`
+- **Cards**: `bg-white border border-gray-100 rounded-lg`
+- **Icons**: Iconify lucide set (`lucide:package`, `lucide:layers`, etc.)
+- **Grid**: 8px base unit
+
+### Superdesign Draft References
+| Page | Draft ID | Route |
+|---|---|---|
+| Login (buyer) | `e14f4ab3` | `/login` |
+| Product Catalogue | `5aaa2ae4` | `/dashboard` |
+| Cart Review | `26bc23e2` | `/cart` |
+| Order Confirmation | `ea88ab06` | `/checkout/confirmed` |
+| Order History | `2e065511` | `/orders` |
+
+### Key Layout Patterns
+- **Catalogue**: `h-screen overflow-hidden flex flex-col` — full viewport, no scroll on nav. Main splits: `flex-1 overflow-y-auto` (product list) + `w-[400px] border-l` (cart sidebar)
+- **Cart Review**: `max-w-[1440px] mx-auto` — `grid grid-cols-12` — 8 cols table + 4 cols sticky summary
+- **Order History**: `max-w-[1200px] mx-auto` — full-width table with accordion expand
+- **Confirmation**: Floating blurred nav `bg-white/80 backdrop-blur-md` + centered success card `max-w-[560px]`
+
+---
+
 ## Phase 2: Catalog & Cart
 > Goal: Full product catalog rendered from Supabase. Client-side cart with add/adjust/total. Order history with reorder flow.
+> Design: Elite SaaS — Inter font, slate-900 primary, 8px grid, top nav, high-density table layout.
 
-### 2.1 — Product Catalog Page
-- [ ] Create `src/app/(portal)/dashboard/page.tsx` — protected buyer route
-- [ ] Server component fetches all active products via service role (RLS handles buyer visibility)
-- [ ] Render products as a single scrolling page (no category filtering in UI)
-- [ ] Build `<ProductCard>` component: image, name, SKU, price (ZAR), details, add-to-cart button
-- [ ] Build `<ProductGrid>` component
-- [ ] COMMIT: `feat: add product catalog page`
+### 2.0 — Design System Foundation ✅ (types updated)
+- [x] `src/lib/supabase/types.ts` updated to v2 normalized schema (12 tables)
+- [ ] Add Inter font to `src/app/layout.tsx` (Google Fonts)
+- [ ] Set `font-family: 'Inter'` as Tailwind base in `globals.css`
+- [ ] Install Zustand: `npm install zustand`
+- [ ] Install Iconify React: `npm install @iconify/react`
+
+### 2.1 — Shared Components
+- [ ] `src/components/portal/NavBar.tsx` — 64px top nav: logo + Catalogue/Order History links + Logout
+  - Active link state: underline indicator via `::after`
+  - `currentPath` prop to highlight active link
+- [ ] `src/components/portal/QuantityStepper.tsx` — `-` / `input[number]` / `+` with min=1
 
 ### 2.2 — Cart State (Client-Side)
-- [ ] Create `src/lib/cart/store.ts` — Zustand store (or React Context):
-  - State: `items: CartItem[]`, `addItem`, `removeItem`, `updateQuantity`, `clearCart`, `totalAmount`
-  - Persist to `localStorage` for session resilience
-- [ ] Write unit tests for all cart operations
-- [ ] Build `<CartSidebar>` or `<CartDrawer>` component
-- [ ] Build `<CartBadge>` for header item count
-- [ ] COMMIT: `feat: implement client-side cart state`
+- [ ] Install Zustand: `npm install zustand`
+- [ ] `src/lib/cart/store.ts` — Zustand store:
+  - `CartItem`: `{ productId, sku, name, unitPrice, quantity, variantInfo? }`
+  - Actions: `addItem`, `updateQuantity`, `removeItem`, `clearCart`
+  - Computed: `subtotal`, `vatAmount` (from tenant vat_rate), `total`
+  - Persist to `localStorage`
+- [ ] `src/components/portal/CartSidebar.tsx` — 400px right panel (design: draft 5aaa2ae4):
+  - Item list: thumbnail icon + SKU + name + qty + line total + remove button
+  - Footer: subtotal / est. shipping / total + "Review Order" → `/cart`
 
-### 2.3 — Order History & Reorder
-- [ ] Create `src/app/(portal)/orders/page.tsx` — fetches buyer's own orders via server action
-- [ ] Build `<OrderHistoryTable>` component
-- [ ] Build `<OrderDetailModal>` component
-- [ ] Implement `reorderAction(orderId)`:
-  - Fetch order_items for the given order
-  - Merge into current cart state
-  - Redirect to `/cart` for review
-- [ ] Write tests for reorder merge logic (handles products no longer active)
-- [ ] COMMIT: `feat: add order history and reorder flow`
+### 2.3 — Product Catalog Page
+- [ ] `src/app/(portal)/dashboard/page.tsx` — server component, fetches active products + tenant_config
+- [ ] Layout: `h-screen overflow-hidden flex flex-col` + sticky 64px NavBar + SKU search bar + split main
+- [ ] `src/components/portal/ProductRow.tsx` — grid row (design: draft 5aaa2ae4):
+  - Columns: `60px thumb | 140px SKU | 1fr description | 120px price | 140px qty stepper | 100px Add button`
+  - Thumbnail: primary image from `product_images`, fallback to `lucide:package` icon
+  - "Add" button calls `cartStore.addItem()`
+- [ ] SKU search: client-side filter on `sku` and `name` fields (no server round-trip)
+- [ ] COMMIT: `feat: add product catalog with cart sidebar`
+
+### 2.4 — Order History & Reorder
+- [ ] `src/app/(portal)/orders/page.tsx` — server component, fetches buyer's orders with item counts
+- [ ] Layout: `max-w-[1200px] mx-auto` + 64px NavBar (Order History tab active)
+- [ ] `src/components/portal/OrderHistoryTable.tsx` (design: draft 2e065511):
+  - Columns: Date | Reference ID | Items | Total | Reorder button
+  - Accordion expand row: inline `<table>` of line items (SKU | Description | Unit | Qty | Subtotal)
+  - Pagination: page-based (10 per page)
+- [ ] `reorderAction(orderId)` — server action: fetch order_items → merge into cart → redirect `/cart`
+- [ ] COMMIT: `feat: add order history with accordion and reorder`
 
 ---
 
 ## Phase 3: Divergent Checkout (RBAC)
 > Goal: Checkout flow splits based on buyer role.
+> Design: Cart Review (draft 26bc23e2) + Order Confirmation (draft ea88ab06).
 
 ### 3.1 — Cart Review Page
-- [ ] Create `src/app/(portal)/cart/page.tsx`
-- [ ] Display cart items, quantities (editable), line totals, grand total (ZAR)
-- [ ] "Proceed to Checkout" button
+- [ ] `src/app/(portal)/cart/page.tsx` — reads from Zustand store (client component wrapper)
+- [ ] Layout: `max-w-[1440px] grid grid-cols-12` (design: draft 26bc23e2):
+  - 8-col table: SKU | Description | editable Qty stepper | Line Total
+  - 4-col sticky summary card (`bg-slate-100 rounded-lg p-6`): subtotal + VAT + total + CTA button
+  - CTA → `checkoutAction` (server action)
 
 ### 3.2 — Checkout Logic (Role-Aware)
-- [ ] Create `checkoutAction(cartItems)` Server Action:
+- [ ] `src/app/actions/checkout.ts` — `checkoutAction(cartItems)` Server Action:
   - Validate session + cart with Zod
-  - Insert `orders` record + `order_items` records atomically
+  - Compute: subtotal, vat_amount (tenant vat_rate), total_amount
+  - Insert `orders` + `order_items` atomically via service role client
+  - Clear cart after insert
   - Role branch:
-    - `buyer_default` → redirect `/checkout/payment` (EFT details)
-    - `buyer_30_day` → redirect `/checkout/confirmed?orderId=...`
-- [ ] Write tests for both role branches
+    - `buyer_default` → redirect `/checkout/payment?orderId=...`
+    - `buyer_30_day` → set status `confirmed` → redirect `/checkout/confirmed?orderId=...`
 
 ### 3.3 — EFT Payment Page
-- [ ] Create `src/app/(portal)/checkout/payment/page.tsx`
-- [ ] Display formatted invoice (Order ID, items, total) + static EFT bank details
-- [ ] "I have made payment" → marks order status `pending`, redirects to confirmation
+- [ ] `src/app/(portal)/checkout/payment/page.tsx` — server component, loads order + tenant_config bank details
+- [ ] Display: order reference, items summary, total + EFT bank details grid
+- [ ] "I have made payment" button → `markPaymentSubmittedAction` → inserts into `payments` table, redirects to `/checkout/confirmed?orderId=...`
 
 ### 3.4 — Order Confirmation Page
-- [ ] Create `src/app/(portal)/checkout/confirmed/page.tsx`
-- [ ] Shows order summary and confirmation message
+- [ ] `src/app/(portal)/checkout/confirmed/page.tsx` (design: draft ea88ab06):
+  - Floating blurred nav: `bg-white/80 backdrop-blur-md rounded-2xl`
+  - Success card `max-w-[560px]`: green check icon + order reference + total + EFT bank details grid
+  - "Download Invoice PDF" CTA (wired up in Phase 4)
+  - "Return to Catalogue" link
 - [ ] COMMIT: `feat: implement divergent checkout flow with RBAC`
 
 ---

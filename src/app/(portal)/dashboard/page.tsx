@@ -1,35 +1,50 @@
-// Phase 2: Product catalog renders here.
-// Placeholder confirms auth + middleware are working correctly.
 import { getSession } from "@/lib/auth/session";
 import { redirect } from "next/navigation";
-import { logoutAction } from "@/app/actions/auth";
-import { Button } from "@/components/ui/button";
+import { adminClient } from "@/lib/supabase/admin";
+import NavBar from "@/components/portal/NavBar";
+import CatalogueShell from "./CatalogueShell";
 
 export default async function DashboardPage() {
   const session = await getSession();
   if (!session) redirect("/login");
 
+  const { data: products, error } = await adminClient
+    .from("products")
+    .select(
+      `id, sku, name, description, price,
+       product_images ( url, is_primary, display_order )`
+    )
+    .eq("is_active", true)
+    .order("sku");
+
+  if (error) {
+    console.error("[dashboard] products fetch error:", error.message);
+  }
+
+  const rows = (products ?? []).map((p) => {
+    const images = (p.product_images ?? []) as {
+      url: string;
+      is_primary: boolean;
+      display_order: number;
+    }[];
+    const sorted = [...images].sort((a, b) => {
+      if (a.is_primary !== b.is_primary) return a.is_primary ? -1 : 1;
+      return a.display_order - b.display_order;
+    });
+    return {
+      productId: p.id,
+      sku: p.sku,
+      name: p.name,
+      description: p.description as string | null,
+      price: Number(p.price),
+      primaryImageUrl: sorted[0]?.url ?? null,
+    };
+  });
+
   return (
-    <main className="container mx-auto px-4 py-10 max-w-5xl">
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="text-2xl font-bold">Product Catalogue</h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            Account:{" "}
-            <span className="font-mono font-medium">
-              {session.accountNumber}
-            </span>
-          </p>
-        </div>
-        <form action={logoutAction}>
-          <Button variant="outline" size="sm" type="submit">
-            Sign Out
-          </Button>
-        </form>
-      </div>
-      <p className="text-muted-foreground">
-        Phase 2 — Product catalog coming soon.
-      </p>
-    </main>
+    <div className="h-screen overflow-hidden flex flex-col bg-white">
+      <NavBar />
+      <CatalogueShell products={rows} />
+    </div>
   );
 }
