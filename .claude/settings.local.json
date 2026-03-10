@@ -12,7 +12,8 @@
       "Bash(node:*)",
       "Bash(rm:*)",
       "WebFetch(domain:raw.githubusercontent.com)",
-      "Bash(superdesign:*)"
+      "Bash(superdesign:*)",
+      "Bash(ls not:*)"
     ]
   }
 }
