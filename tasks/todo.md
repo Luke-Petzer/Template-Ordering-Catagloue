@@ -210,39 +210,115 @@
 
 ## Phase 5: Admin Dashboard
 > Goal: Full admin CRUD for products, orders, and client profiles.
+> Architecture: Single-page Command Center with slide-over drawers for all CRUD. No separate sub-pages.
 
-### 5.1 — Admin Layout & Navigation
-- [ ] Create `src/app/(admin)/admin/layout.tsx` — admin-only layout with sidebar nav
-- [ ] Nav items: Dashboard, Products, Orders, Clients
+### Design Decisions (confirmed)
+- **Command Center**: Dashboard stats + Order Ledger combined on one `/admin` page (no separate `/admin/orders`)
+- **CRUD UX**: All product + client create/edit in right-side slide-over drawers — no separate routes
+- **Product images**: Upload directly to Supabase Storage (not URL strings)
+- **Settings lock**: `/admin/settings` restricted to `ADMIN_SUPER_EMAIL` env var; other admins see 403
+- **No global search** in the admin header
+- **Order Ledger extras**: "Download CSV" export button + "Mark Processed in POS" toggle per order
 
-### 5.2 — Product Management
-- [ ] `src/app/(admin)/admin/products/page.tsx` — list all products
-- [ ] Add product form (SKU, name, description, price, image URL, details, category, variants JSON)
-- [ ] Edit product form (pre-populated)
-- [ ] Soft-delete (set `is_active = false`)
-- [ ] Server Actions: `createProductAction`, `updateProductAction`, `deactivateProductAction`
+### Superdesign Draft References (Phase 5)
+| Page | Draft ID | Route |
+|---|---|---|
+| Command Center | `a202c611-00a7-4771-bf24-297932d363ec` | `/admin` |
+| Product Management | `0cbd50e7-824a-4d5c-8b4a-0fbc535a92d0` | `/admin/products` |
+| Client Profiles | `05d7d4c3-a160-444c-a32a-c9cdb469feaa` | `/admin/clients` |
+| Settings | `569e75e6-82aa-429e-8662-391f686d9512` | `/admin/settings` |
+| Audit Log | `3588b8e1-0777-430d-84ce-275f7e8d73ca` | `/admin/audit` |
+
+### Admin Design Tokens (from Superdesign)
+**Shell:**
+- Sidebar: `w-[250px] bg-slate-900 fixed`, logo box `w-8 h-8 rounded-lg bg-slate-100`
+- Nav active: `bg-slate-800 text-white rounded-lg px-3 py-2.5`
+- Nav inactive: `text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 rounded-lg px-3 py-2.5`
+- Nav section labels: `text-[11px] font-medium text-slate-500 uppercase tracking-wider`
+- Header: `h-16 bg-white border-b border-slate-200 sticky top-0 z-20` — NO search bar (user spec)
+- Content: `flex-1 ml-[250px]`, page area: `flex-1 overflow-y-auto p-8`
+
+**Tables:** `bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden`
+- TH: `text-[11px] font-medium text-slate-400 uppercase tracking-wider px-6 py-3`
+- Row hover: `hover:bg-slate-50/50 transition-colors`
+- Row divider: `divide-y divide-slate-50`
+- Pagination current: `w-8 h-8 bg-slate-900 text-white rounded-lg text-xs font-medium`
+
+**KPI cards:** `bg-white rounded-xl border border-slate-200 p-6`
+- Icon: `w-10 h-10 rounded-lg bg-{color}-50`, value: `text-3xl font-semibold text-slate-900 tracking-tight`
+
+**Drawers:** `fixed top-0 right-0 h-full w-[400px] bg-white shadow-2xl z-50`
+- Overlay: `fixed inset-0 bg-slate-900/40 z-40`
+- Header: `h-16 px-6 border-b border-slate-100`; body: `flex-1 overflow-y-auto p-6 space-y-6`
+- Form label: `text-xs font-semibold text-slate-700 uppercase tracking-wider`
+- Input: `h-10 px-3 bg-white border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-slate-900/10 focus:border-slate-900`
+- Footer: `p-6 border-t border-slate-100 bg-white sticky bottom-0`
+- Cancel: `flex-1 h-11 border border-slate-200 rounded-lg text-sm font-medium text-slate-700`
+- Save: `flex-[2] h-11 bg-slate-900 text-white rounded-lg text-sm font-semibold`
+
+**Badges:**
+- POS Processed / Active: `bg-emerald-50 text-emerald-700 border border-emerald-200`
+- POS Pending / Default: `bg-slate-100 text-slate-500 border border-slate-200`
+- 30-Day role: `bg-blue-50 text-blue-700 border border-blue-200`
+- Audit INSERT: `bg-emerald-50 text-emerald-700`; UPDATE: `bg-blue-50 text-blue-700`; DELETE: `bg-red-50 text-red-700`
+
+**Settings page:** `max-w-[800px]` centered, cards with icon + title header, sticky bottom save bar:
+`fixed bottom-0 left-[250px] right-0 h-20 bg-white/95 backdrop-blur-sm border-t`
+
+### 5.1 — Admin Shell
+- [ ] `src/app/(admin)/layout.tsx` — admin root layout: sidebar nav + content area
+  - Sidebar: Logo / Command Center / Products / Clients / Settings / Audit Log
+  - Auth guard: `getSession()` — admin role required, redirect `/admin/login` otherwise
+  - No global search bar
+- [ ] `src/components/admin/AdminSidebar.tsx` — active state via `usePathname()`
+- [ ] `src/components/admin/SlideoverDrawer.tsx` — reusable right-side drawer (focus trap, ESC close, backdrop)
+
+### 5.2 — Command Center (Dashboard + Order Ledger)
+- [ ] `src/app/(admin)/page.tsx` — server component
+  - Stat cards: Total Orders / Revenue MTD / Pending Payments / Active Clients
+  - Order Ledger table (paginated, 20/page): Date | Reference | Client | Items | Total | Status | Actions
+  - Accordion row expand: line items table (SKU | Name | Qty | Unit | Line Total)
+  - Filters: status dropdown + date range + client search
+- [ ] `src/components/admin/OrderLedger.tsx` — client component
+  - "Download CSV" button → `exportOrdersCsvAction` (streams CSV from all filtered orders)
+  - "Mark Processed" toggle per row → `markProcessedAction` (sets `status = 'fulfilled'`)
+  - Status badge: colour-coded pill (pending=amber, confirmed=blue, fulfilled=green, cancelled=red)
+- [ ] Server Actions: `exportOrdersCsvAction`, `markProcessedAction`
+
+### 5.3 — Product Management
+- [ ] Products list embedded in sidebar or accessible via `/admin/products`
+- [ ] `src/components/admin/ProductDrawer.tsx` — slide-over for create + edit
+  - Fields: SKU, Name, Description, Details, Price, Category, Track Stock, Stock Qty, Variants JSON, Active toggle
+  - Image upload: `<input type="file">` → upload to Supabase Storage bucket `product-images` → save URL to `product_images` table
+- [ ] Server Actions: `createProductAction`, `updateProductAction`, `deactivateProductAction`, `uploadProductImageAction`
 - [ ] Zod validation on all actions
-
-### 5.3 — Order Ledger
-- [ ] `src/app/(admin)/admin/orders/page.tsx` — paginated order list, all buyers
-- [ ] Filter by status, date range, buyer
-- [ ] Order detail view with item breakdown
-- [ ] Admin can update order status
 
 ### 5.4 — Client Profile Management
-- [ ] `src/app/(admin)/admin/clients/page.tsx` — list all profiles
-- [ ] Create client profile (sets account_number, role, business_name, contact_name, email)
-- [ ] Edit client (update role: `buyer_default` ↔ `buyer_30_day`, toggle `is_active`)
+- [ ] Clients list at `/admin/clients`
+- [ ] `src/components/admin/ClientDrawer.tsx` — slide-over for create + edit
+  - Fields: Business Name, Trading Name, Contact Name, Email, Phone, VAT No., Account Number (auto-gen or manual), Role, Credit Limit, Terms Days, Notes, Active toggle
+  - Role toggle: `buyer_default` ↔ `buyer_30_day`
 - [ ] Server Actions: `createClientAction`, `updateClientAction`
 - [ ] Zod validation on all actions
-- [ ] COMMIT: `feat: implement admin dashboard with CRUD for products, orders, clients`
+
+### 5.5 — Settings Page (Super-Admin Only)
+- [ ] `src/app/(admin)/settings/page.tsx`
+  - Guard: compare `session.email` to `process.env.ADMIN_SUPER_EMAIL`; render 403 if mismatch
+  - Editable fields from `tenant_config`: business_name, trading_name, vat_number, bank details, email settings, vat_rate, payment_terms_days, footer_text
+- [ ] `updateTenantConfigAction` server action
+
+### 5.6 — Audit Log
+- [ ] `src/app/(admin)/audit/page.tsx`
+  - Paginated read of `audit_log` table (newest first)
+  - Columns: Timestamp | Actor | Table | Action | Row ID
+  - Expandable row: before/after JSON diff
+- [ ] COMMIT: `feat: implement admin dashboard — command center, products, clients, settings, audit log`
 
 ---
 
 ## Backlog / Future Enhancements
 - [ ] Buyer session revocation table (invalidate tokens server-side)
 - [ ] Stock / inventory management on products
-- [ ] Product image upload (Supabase Storage)
 - [ ] Bulk CSV product import
 - [ ] Direct Omni v7 XML/CSV export
 - [ ] SMS notifications via Twilio
