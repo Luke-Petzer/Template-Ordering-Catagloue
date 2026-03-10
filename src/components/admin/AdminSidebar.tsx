@@ -17,6 +17,7 @@ import type { Route } from "next";
 interface AdminSidebarProps {
   adminName: string;
   adminEmail: string;
+  isSuperAdmin: boolean;
 }
 
 const MAIN_NAV: { href: Route; label: string; icon: React.ReactNode }[] = [
@@ -58,7 +59,7 @@ function initials(name: string): string {
     .join("");
 }
 
-export default function AdminSidebar({ adminName, adminEmail }: AdminSidebarProps) {
+export default function AdminSidebar({ adminName, adminEmail, isSuperAdmin }: AdminSidebarProps) {
   const pathname = usePathname();
 
   function isActive(href: string): boolean {
@@ -107,7 +108,9 @@ export default function AdminSidebar({ adminName, adminEmail }: AdminSidebarProp
           System
         </p>
 
-        {SYSTEM_NAV.map(({ href, label, icon }) => (
+        {SYSTEM_NAV.filter(
+          ({ href }) => href !== "/admin/settings" || isSuperAdmin
+        ).map(({ href, label, icon }) => (
           <Link
             key={href}
             href={href}

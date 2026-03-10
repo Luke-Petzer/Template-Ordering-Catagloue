@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import { getSession } from "@/lib/auth/session";
 import { adminClient } from "@/lib/supabase/admin";
+import { createClient } from "@/lib/supabase/server";
 import type { Route } from "next";
 import type { Database } from "@/lib/supabase/types";
 
@@ -391,5 +392,72 @@ export async function updateClientAction(
     console.error("[admin] updateClient:", error.message);
     if (error.code === "23505") return { error: "A client with this account number already exists." };
     return { error: "Failed to update client. Please try again." };
+  }
+}
+
+// ---------------------------------------------------------------------------
+// updateTenantConfigAction
+// ---------------------------------------------------------------------------
+
+/**
+ * Updates the singleton tenant_config row (id = 1).
+ * Guarded by an email lock — only the super admin may update settings.
+ */
+export async function updateTenantConfigAction(
+  formData: FormData
+): Promise<{ error: string } | void> {
+  await requireAdmin();
+
+  // Email lock: only the super admin (ADMIN_SUPER_EMAIL) can save settings
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const superEmail = process.env.ADMIN_SUPER_EMAIL;
+  if (!superEmail || user?.email !== superEmail) {
+    return { error: "Unauthorised: only the super admin can update settings." };
+  }
+
+  const businessName = (formData.get("business_name") as string).trim();
+  if (!businessName) return { error: "Business name is required." };
+
+  // vat_rate stored as decimal (0.15), form sends as percentage (15)
+  const vatRateRaw = parseFloat(formData.get("vat_rate") as string);
+  const vatRate = isNaN(vatRateRaw) ? 0.15 : vatRateRaw / 100;
+
+  const bankRefPrefix =
+    (formData.get("bank_reference_prefix") as string | null)?.trim() || "ORD";
+
+  const { error } = await adminClient
+    .from("tenant_config")
+    .update({
+      business_name: businessName,
+      trading_name:
+        (formData.get("trading_name") as string | null)?.trim() || null,
+      vat_number:
+        (formData.get("vat_number") as string | null)?.trim() || null,
+      vat_rate: vatRate,
+      support_email:
+        (formData.get("support_email") as string | null)?.trim() || null,
+      support_phone:
+        (formData.get("support_phone") as string | null)?.trim() || null,
+      bank_name:
+        (formData.get("bank_name") as string | null)?.trim() || null,
+      bank_account_holder:
+        (formData.get("bank_account_holder") as string | null)?.trim() || null,
+      bank_account_number:
+        (formData.get("bank_account_number") as string | null)?.trim() || null,
+      bank_branch_code:
+        (formData.get("bank_branch_code") as string | null)?.trim() || null,
+      bank_account_type:
+        (formData.get("bank_account_type") as string | null)?.trim() || null,
+      bank_reference_prefix: bankRefPrefix,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", 1);
+
+  if (error) {
+    console.error("[admin] updateTenantConfig:", error.message);
+    return { error: "Failed to save settings. Please try again." };
   }
 }

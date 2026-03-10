@@ -1,6 +1,7 @@
 import { getSession } from "@/lib/auth/session";
 import { redirect } from "next/navigation";
 import { adminClient } from "@/lib/supabase/admin";
+import { createClient } from "@/lib/supabase/server";
 import { Bell, ChevronDown } from "lucide-react";
 import AdminSidebar from "@/components/admin/AdminSidebar";
 import type { Route } from "next";
@@ -23,9 +24,19 @@ export default async function AdminLayout({
   const adminName = profile?.contact_name ?? "Admin";
   const adminEmail = profile?.email ?? "";
 
+  // Determine super admin status via Supabase Auth email
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const superEmail = process.env.ADMIN_SUPER_EMAIL;
+  const isSuperAdmin = Boolean(
+    superEmail && user?.email && user.email === superEmail
+  );
+
   return (
     <div className="min-h-screen bg-slate-50 flex font-inter">
-      <AdminSidebar adminName={adminName} adminEmail={adminEmail} />
+      <AdminSidebar adminName={adminName} adminEmail={adminEmail} isSuperAdmin={isSuperAdmin} />
 
       {/* Main area */}
       <div className="flex-1 ml-[250px] flex flex-col min-h-screen">
