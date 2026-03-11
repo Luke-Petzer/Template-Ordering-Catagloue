@@ -294,13 +294,13 @@ export default function ProductDrawer({
               <FieldLabel>Category</FieldLabel>
               <Select
                 name="category_id"
-                defaultValue={product?.category_id ?? ""}
+                defaultValue={product?.category_id ?? "none"}
               >
                 <SelectTrigger className="h-10 text-sm border-slate-200 focus:ring-slate-900/10 focus:border-slate-900">
                   <SelectValue placeholder="Select category…" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">No category</SelectItem>
+                  <SelectItem value="none">No category</SelectItem>
                   {categories.map((c) => (
                     <SelectItem key={c.id} value={c.id}>
                       {c.name}

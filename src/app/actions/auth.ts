@@ -124,26 +124,40 @@ export async function adminLoginAction(
   const { email, password } = parsed.data;
 
   const supabase = await createClient();
-  const { error } = await supabase.auth.signInWithPassword({ email, password });
+  console.log("[adminLogin] Attempting signInWithPassword for:", email);
 
-  if (error) {
+  const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+
+  if (signInError) {
+    console.log("[adminLogin] signInWithPassword failed:", signInError.message, signInError.status);
     return { error: "Invalid email or password." };
   }
+
+  console.log("[adminLogin] signInWithPassword succeeded");
 
   // Verify this Supabase Auth user is actually an admin
   const {
     data: { user },
+    error: getUserError,
   } = await supabase.auth.getUser();
+
+  console.log("[adminLogin] getUser result — user.id:", user?.id ?? "null", "error:", getUserError?.message ?? "none");
 
   if (!user) {
     return { error: "Authentication failed." };
   }
 
-  const { data: profile } = await supabase
+  // Use adminClient (service role) to bypass RLS on profiles.
+  // The standard SSR client JWT won't have an app_role claim for users
+  // created via the Supabase dashboard, causing both RLS SELECT policies to fail.
+  console.log("[adminLogin] Looking up profile via adminClient for auth_user_id:", user.id);
+  const { data: profile, error: profileError } = await adminClient
     .from("profiles")
     .select("role")
     .eq("auth_user_id", user.id)
     .single();
+
+  console.log("[adminLogin] Profile lookup result — role:", profile?.role ?? "null", "error:", profileError?.message ?? "none", "code:", profileError?.code ?? "none");
 
   if (!profile || profile.role !== "admin") {
     // Sign out immediately — this is a buyer account trying to use the admin endpoint
@@ -151,7 +165,8 @@ export async function adminLoginAction(
     return { error: "Invalid email or password." };
   }
 
-  redirect("/admin/dashboard");
+  console.log("[adminLogin] Admin verified, redirecting to /admin");
+  redirect("/admin");
 }
 
 // ── Logout ─────────────────────────────────────────────────────────────────

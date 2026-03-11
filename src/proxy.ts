@@ -95,7 +95,7 @@ export async function proxy(request: NextRequest) {
       data: { user },
     } = await supabase.auth.getUser();
     if (user) {
-      return NextResponse.redirect(new URL("/admin/dashboard", request.url));
+      return NextResponse.redirect(new URL("/admin", request.url));
     }
 
     return NextResponse.redirect(new URL("/login", request.url));

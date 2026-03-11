@@ -182,7 +182,8 @@ export async function createProductAction(
   const description = (formData.get("description") as string | null)?.trim() ?? null;
   const details = (formData.get("details") as string | null)?.trim() ?? null;
   const priceRaw = parseFloat(formData.get("price") as string);
-  const categoryId = (formData.get("category_id") as string | null) || null;
+  const categoryIdRaw = (formData.get("category_id") as string | null)?.trim();
+  const categoryId = (!categoryIdRaw || categoryIdRaw === "none") ? null : categoryIdRaw;
   const trackStock = formData.get("track_stock") === "true";
   const stockQty = parseInt(formData.get("stock_qty") as string, 10) || 0;
 
@@ -232,7 +233,8 @@ export async function updateProductAction(
   const description = (formData.get("description") as string | null)?.trim() ?? null;
   const details = (formData.get("details") as string | null)?.trim() ?? null;
   const priceRaw = parseFloat(formData.get("price") as string);
-  const categoryId = (formData.get("category_id") as string | null) || null;
+  const categoryIdRaw = (formData.get("category_id") as string | null)?.trim();
+  const categoryId = (!categoryIdRaw || categoryIdRaw === "none") ? null : categoryIdRaw;
   const trackStock = formData.get("track_stock") === "true";
   const stockQty = parseInt(formData.get("stock_qty") as string, 10) || 0;
   const isActive = formData.get("is_active") !== "false";

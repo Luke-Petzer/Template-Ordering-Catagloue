@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import type { ReadonlyRequestCookies } from "next/dist/server/web/spec-extension/adapters/request-cookies";
 import { verifyBuyerSession, BUYER_SESSION_COOKIE } from "./buyer";
 import { createClient } from "@/lib/supabase/server";
+import { adminClient } from "@/lib/supabase/admin";
 import type { AppRole } from "@/lib/supabase/types";
 
 export interface ActiveSession {
@@ -51,8 +52,10 @@ export async function getSession(
   } = await supabase.auth.getUser();
 
   if (user) {
-    // Fetch profile to get role (profile.id === auth.users.id for admins)
-    const { data: profile } = await supabase
+    // Use adminClient (service role) to bypass RLS on profiles.
+    // Supabase Auth dashboard users don't have app_role in their JWT, so both
+    // RLS SELECT policies evaluate to false/null for admin accounts.
+    const { data: profile } = await adminClient
       .from("profiles")
       .select("id, role, account_number")
       .eq("auth_user_id", user.id)

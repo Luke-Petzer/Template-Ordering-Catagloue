@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition, useCallback } from "react";
+import React, { useState, useTransition, useCallback } from "react";
 import {
   ChevronRight,
   ChevronDown,
@@ -331,9 +331,8 @@ export default function OrderLedger({
             orders.map((order) => {
               const isExpanded = expandedId === order.id;
               return (
-                <>
+                <React.Fragment key={order.id}>
                   <tr
-                    key={order.id}
                     onClick={() =>
                       setExpandedId(isExpanded ? null : order.id)
                     }
@@ -366,12 +365,11 @@ export default function OrderLedger({
                   </tr>
                   {isExpanded && (
                     <ExpandedRow
-                      key={`${order.id}-expanded`}
                       order={order}
                       onMarked={handleMarked}
                     />
                   )}
-                </>
+                </React.Fragment>
               );
             })
           )}
