@@ -1,6 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
 import { getSession } from "@/lib/auth/session";
 import { adminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
@@ -213,6 +214,7 @@ export async function createProductAction(
     return { error: "Failed to create product. Please try again." };
   }
 
+  revalidatePath("/admin/products");
   return { id: data.id };
 }
 
@@ -264,6 +266,8 @@ export async function updateProductAction(
     if (error.code === "23505") return { error: "A product with this SKU already exists." };
     return { error: "Failed to update product. Please try again." };
   }
+
+  revalidatePath("/admin/products");
 }
 
 // ---------------------------------------------------------------------------
@@ -341,6 +345,7 @@ export async function createClientAction(
     return { error: "Failed to create client. Please try again." };
   }
 
+  revalidatePath("/admin/clients");
   return { id: data.id };
 }
 
@@ -395,6 +400,8 @@ export async function updateClientAction(
     if (error.code === "23505") return { error: "A client with this account number already exists." };
     return { error: "Failed to update client. Please try again." };
   }
+
+  revalidatePath("/admin/clients");
 }
 
 // ---------------------------------------------------------------------------

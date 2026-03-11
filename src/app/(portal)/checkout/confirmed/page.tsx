@@ -2,8 +2,9 @@ import { getSession } from "@/lib/auth/session";
 import { redirect, notFound } from "next/navigation";
 import { adminClient } from "@/lib/supabase/admin";
 import Link from "next/link";
-import { CheckCircle2, Layers, ArrowLeft, Download } from "lucide-react";
+import { CheckCircle2, ArrowLeft, Download } from "lucide-react";
 import CartClearer from "./CartClearer";
+import NavBar from "@/components/portal/NavBar";
 
 const ZAR = new Intl.NumberFormat("en-ZA", {
   style: "currency",
@@ -46,37 +47,11 @@ export default async function ConfirmedPage({ searchParams }: PageProps) {
   const bankRef = `${config?.bank_reference_prefix ?? "INV"}-${order.reference_number}`;
 
   return (
-    <div className="min-h-screen flex flex-col items-center relative bg-[#fafafa]">
-      {/* Floating blurred nav — matches ea88ab06 design */}
-      <nav className="fixed top-6 left-1/2 -translate-x-1/2 w-[calc(100%-3rem)] max-w-7xl h-[64px] rounded-2xl border border-gray-100 bg-white/80 backdrop-blur-md flex items-center justify-between px-8 z-50 shadow-sm">
-        <div className="flex items-center gap-8">
-          <Link href="/dashboard" className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-slate-900 rounded flex items-center justify-center">
-              <Layers className="text-white w-[18px] h-[18px]" />
-            </div>
-            <span className="text-lg font-bold tracking-tight text-slate-900">
-              {config?.business_name ?? "Portal"}
-            </span>
-          </Link>
-          <div className="flex items-center gap-8 ml-4">
-            <Link
-              href="/dashboard"
-              className="text-sm font-medium text-gray-400 hover:text-slate-900 transition-colors"
-            >
-              Catalogue
-            </Link>
-            <Link
-              href="/orders"
-              className="text-sm font-medium text-gray-400 hover:text-slate-900 transition-colors"
-            >
-              Order History
-            </Link>
-          </div>
-        </div>
-      </nav>
+    <div className="min-h-screen flex flex-col bg-[#fafafa]">
+      <NavBar />
 
       {/* Main content */}
-      <main className="flex-1 flex flex-col items-center justify-center w-full px-6 pt-32 pb-12">
+      <main className="flex-1 flex flex-col items-center justify-center w-full px-6 py-12">
         {/* Cart clear on mount — client component */}
         <CartClearer />
 
@@ -181,16 +156,15 @@ export default async function ConfirmedPage({ searchParams }: PageProps) {
             )}
           </div>
 
-          {/* Download invoice CTA — wired in Phase 4 */}
-          <button
-            type="button"
-            disabled
-            className="w-full h-12 flex items-center justify-center gap-2 bg-slate-900 text-white rounded-xl font-semibold text-sm hover:bg-slate-800 active:scale-[0.98] transition-all mb-6 disabled:opacity-50 disabled:cursor-not-allowed"
-            title="PDF invoice available after Phase 4"
+          {/* Download invoice PDF */}
+          <a
+            href={`/api/invoice/${order.id}`}
+            download={`Invoice-${order.reference_number}.pdf`}
+            className="w-full h-12 flex items-center justify-center gap-2 bg-slate-900 text-white rounded-xl font-semibold text-sm hover:bg-slate-800 active:scale-[0.98] transition-all mb-6"
           >
             <Download className="w-5 h-5" />
             Download Invoice PDF
-          </button>
+          </a>
 
           <p className="text-[13px] text-gray-400">
             A confirmation has been sent to your registered business email.
@@ -208,11 +182,6 @@ export default async function ConfirmedPage({ searchParams }: PageProps) {
         </div>
       </main>
 
-      <footer className="py-8">
-        <p className="text-[11px] text-gray-300 tracking-widest uppercase">
-          {config?.business_name ?? "Portal"}
-        </p>
-      </footer>
     </div>
   );
 }
