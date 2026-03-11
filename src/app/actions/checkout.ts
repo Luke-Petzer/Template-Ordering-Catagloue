@@ -16,11 +16,13 @@ import type { Database } from "@/lib/supabase/types";
 // ---------------------------------------------------------------------------
 
 const CartItemSchema = z.object({
-  productId: z.string().uuid(),
+  productId: z.string().min(1),
   sku: z.string().min(1),
   name: z.string().min(1),
-  unitPrice: z.number().nonnegative(),
-  quantity: z.number().int().positive(),
+  // coerce handles the edge case where React's Server Action serialization
+  // delivers a numeric string instead of a JS number
+  unitPrice: z.coerce.number().nonnegative(),
+  quantity: z.coerce.number().int().positive(),
   primaryImageUrl: z.string().nullable().optional(),
   variantInfo: z
     .object({ label: z.string(), value: z.string() })
@@ -160,8 +162,10 @@ export async function checkoutAction(
   if (!session) redirect("/login" as Route);
 
   // 2. Validate cart payload (passed from client Zustand store)
+  console.log("[checkout] rawItems received:", JSON.stringify(rawItems));
   const parsed = CheckoutSchema.safeParse(rawItems);
   if (!parsed.success) {
+    console.error("[checkout] Zod validation failed:", JSON.stringify(parsed.error.issues, null, 2));
     return { error: "Invalid cart data. Please refresh and try again." };
   }
   const items = parsed.data;
