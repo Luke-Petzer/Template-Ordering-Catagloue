@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useTransition } from "react";
 import Link from "next/link";
-import { Info, Loader2 } from "lucide-react";
+import { Info, Loader2, Trash2 } from "lucide-react";
 import { useCartStore } from "@/lib/cart/store";
 import QuantityStepper from "@/components/portal/QuantityStepper";
 import { checkoutAction } from "@/app/actions/checkout";
@@ -28,7 +28,7 @@ interface CartReviewShellProps {
 }
 
 export default function CartReviewShell({ reorderItems }: CartReviewShellProps) {
-  const { items, updateQuantity, subtotal, addItem } = useCartStore();
+  const { items, updateQuantity, removeItem, subtotal, addItem } = useCartStore();
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
@@ -100,6 +100,7 @@ export default function CartReviewShell({ reorderItems }: CartReviewShellProps) 
                   <th className="px-6 py-4 text-[11px] font-semibold text-gray-400 uppercase tracking-wider text-right">
                     Line Total
                   </th>
+                  <th className="px-6 py-4" />
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
@@ -121,6 +122,16 @@ export default function CartReviewShell({ reorderItems }: CartReviewShellProps) 
                       {ZAR.format(
                         parseFloat((item.unitPrice * item.quantity).toFixed(2))
                       )}
+                    </td>
+                    <td className="px-6 py-5 align-middle">
+                      <button
+                        type="button"
+                        onClick={() => removeItem(item.productId)}
+                        className="text-gray-300 hover:text-red-500 transition-colors"
+                        aria-label={`Remove ${item.name}`}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
                     </td>
                   </tr>
                 ))}

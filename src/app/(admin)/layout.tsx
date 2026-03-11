@@ -2,8 +2,9 @@ import { getSession } from "@/lib/auth/session";
 import { redirect } from "next/navigation";
 import { adminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
-import { Bell, ChevronDown } from "lucide-react";
+import { LogOut } from "lucide-react";
 import AdminSidebar from "@/components/admin/AdminSidebar";
+import { logoutAction } from "@/app/actions/auth";
 import type { Route } from "next";
 
 export default async function AdminLayout({
@@ -40,28 +41,21 @@ export default async function AdminLayout({
 
       {/* Main area */}
       <div className="flex-1 ml-[250px] flex flex-col min-h-screen">
-        {/* Top header — no global search per design spec */}
-        <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-end px-8 sticky top-0 z-20">
-          <div className="flex items-center gap-4">
-            <button className="relative w-10 h-10 flex items-center justify-center rounded-lg hover:bg-slate-100 transition-colors">
-              <Bell className="w-5 h-5 text-slate-500" />
+        {/* Top header */}
+        <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-8 sticky top-0 z-20">
+          <p className="text-sm font-medium text-slate-700">
+            {adminName}
+            <span className="ml-2 text-[11px] font-normal text-slate-400">Admin</span>
+          </p>
+          <form action={logoutAction}>
+            <button
+              type="submit"
+              className="flex items-center gap-2 h-9 px-4 border border-slate-200 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors"
+            >
+              <LogOut className="w-4 h-4" />
+              Logout
             </button>
-            <div className="w-px h-8 bg-slate-200" />
-            <div className="flex items-center gap-3 cursor-default">
-              <div className="w-9 h-9 rounded-full bg-slate-900 flex items-center justify-center text-xs text-white font-semibold">
-                {adminName
-                  .split(" ")
-                  .slice(0, 2)
-                  .map((w) => w[0]?.toUpperCase() ?? "")
-                  .join("")}
-              </div>
-              <div className="hidden xl:block">
-                <p className="text-sm font-medium text-slate-700">{adminName}</p>
-                <p className="text-[11px] text-slate-400">Admin</p>
-              </div>
-              <ChevronDown className="w-4 h-4 text-slate-400 hidden xl:block" />
-            </div>
-          </div>
+          </form>
         </header>
 
         {/* Page content */}

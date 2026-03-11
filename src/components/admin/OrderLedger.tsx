@@ -42,6 +42,8 @@ interface OrderLedgerProps {
   /** Filter state — passed back through URL in parent */
   search: string;
   status: string;
+  dateFrom: string;
+  dateTo: string;
 }
 
 // ---------------------------------------------------------------------------
@@ -225,6 +227,8 @@ export default function OrderLedger({
   pageSize,
   search,
   status,
+  dateFrom,
+  dateTo,
 }: OrderLedgerProps) {
   const [orders, setOrders] = useState<OrderRow[]>(initialOrders);
   const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -264,6 +268,8 @@ export default function OrderLedger({
     params.set("page", String(p));
     if (search) params.set("search", search);
     if (status) params.set("status", status);
+    if (dateFrom) params.set("dateFrom", dateFrom);
+    if (dateTo) params.set("dateTo", dateTo);
     return `?${params.toString()}`;
   };
 

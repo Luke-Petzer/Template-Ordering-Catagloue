@@ -17,6 +17,8 @@ interface PageProps {
     page?: string;
     search?: string;
     status?: string;
+    dateFrom?: string;
+    dateTo?: string;
   }>;
 }
 
@@ -65,7 +67,7 @@ function KpiCard({
 // ---------------------------------------------------------------------------
 
 export default async function AdminCommandCenterPage({ searchParams }: PageProps) {
-  const { page: pageStr, search, status } = await searchParams;
+  const { page: pageStr, search, status, dateFrom, dateTo } = await searchParams;
   const page = Math.max(1, parseInt(pageStr ?? "1", 10));
 
   // ── KPI queries (parallel) ──────────────────────────────────────────────
@@ -112,6 +114,9 @@ export default async function AdminCommandCenterPage({ searchParams }: PageProps
     .range((page - 1) * PAGE_SIZE, page * PAGE_SIZE - 1);
 
   if (status) ordersQuery = ordersQuery.eq("status", status as OrderStatus);
+  // dateFrom/dateTo are YYYY-MM-DD strings — filter on created_at (inclusive)
+  if (dateFrom) ordersQuery = ordersQuery.gte("created_at", `${dateFrom}T00:00:00.000Z`);
+  if (dateTo)   ordersQuery = ordersQuery.lte("created_at", `${dateTo}T23:59:59.999Z`);
 
   const { data: rawOrders, count: totalCount } = await ordersQuery;
 
@@ -200,20 +205,18 @@ export default async function AdminCommandCenterPage({ searchParams }: PageProps
       </div>
 
       {/* Action bar */}
-      <div className="bg-white rounded-xl border border-slate-200 p-4 flex items-center gap-4 mb-6">
-        <form method="GET" className="flex items-center gap-4 flex-1">
+      <div className="bg-white rounded-xl border border-slate-200 p-4 mb-6">
+        <form method="GET" className="flex flex-wrap items-center gap-3">
           {/* Search */}
-          <div className="relative max-w-xs flex-1">
-            <input
-              type="text"
-              name="search"
-              defaultValue={search ?? ""}
-              placeholder="Filter by reference or client..."
-              className="w-full h-9 pl-4 pr-4 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent transition-all"
-            />
-          </div>
+          <input
+            type="text"
+            name="search"
+            defaultValue={search ?? ""}
+            placeholder="Reference or client…"
+            className="h-9 w-52 px-3 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent transition-all"
+          />
 
-          {/* Status filter */}
+          {/* Status — only actionable states */}
           <select
             name="status"
             defaultValue={status ?? ""}
@@ -222,10 +225,25 @@ export default async function AdminCommandCenterPage({ searchParams }: PageProps
             <option value="">All Statuses</option>
             <option value="pending">Pending</option>
             <option value="confirmed">Confirmed</option>
-            <option value="processing">Processing</option>
-            <option value="fulfilled">Fulfilled</option>
-            <option value="cancelled">Cancelled</option>
           </select>
+
+          {/* Date range */}
+          <div className="flex items-center gap-2">
+            <label className="text-xs text-slate-400 font-medium">From</label>
+            <input
+              type="date"
+              name="dateFrom"
+              defaultValue={dateFrom ?? ""}
+              className="h-9 px-3 bg-white border border-slate-200 rounded-lg text-sm text-slate-600 focus:outline-none focus:ring-2 focus:ring-slate-900 transition-all"
+            />
+            <label className="text-xs text-slate-400 font-medium">To</label>
+            <input
+              type="date"
+              name="dateTo"
+              defaultValue={dateTo ?? ""}
+              className="h-9 px-3 bg-white border border-slate-200 rounded-lg text-sm text-slate-600 focus:outline-none focus:ring-2 focus:ring-slate-900 transition-all"
+            />
+          </div>
 
           <button
             type="submit"
@@ -234,7 +252,7 @@ export default async function AdminCommandCenterPage({ searchParams }: PageProps
             Apply
           </button>
 
-          {(search || status) && (
+          {(search || status || dateFrom || dateTo) && (
             <a
               href="/admin"
               className="h-9 px-4 border border-slate-200 text-slate-600 rounded-lg text-sm font-medium hover:bg-slate-50 transition-colors flex items-center"
@@ -253,6 +271,8 @@ export default async function AdminCommandCenterPage({ searchParams }: PageProps
         pageSize={PAGE_SIZE}
         search={search ?? ""}
         status={status ?? ""}
+        dateFrom={dateFrom ?? ""}
+        dateTo={dateTo ?? ""}
       />
     </div>
   );
