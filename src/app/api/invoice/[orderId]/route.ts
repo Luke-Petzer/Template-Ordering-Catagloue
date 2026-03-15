@@ -49,7 +49,7 @@ export async function GET(
 
   const pdfBuffer = await renderInvoiceToBuffer({ order, items, profile, config });
 
-  return new NextResponse(pdfBuffer, {
+return new NextResponse(pdfBuffer as any, {
     status: 200,
     headers: {
       "Content-Type": "application/pdf",
