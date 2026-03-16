@@ -71,9 +71,9 @@ export default function CartReviewShell({ reorderItems }: CartReviewShellProps) 
         </p>
       </div>
 
-      <div className="grid grid-cols-12 gap-8">
-        {/* Items table — 8 cols */}
-        <div className="col-span-8 bg-white border border-gray-100 rounded-lg overflow-hidden shadow-sm">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        {/* Items table — 8 cols on desktop, full width on mobile */}
+        <div className="col-span-1 lg:col-span-8 bg-white border border-gray-100 rounded-lg overflow-hidden shadow-sm">
           {items.length === 0 ? (
             <div className="px-6 py-16 text-center">
               <p className="text-sm text-gray-400">Your cart is empty.</p>
@@ -85,8 +85,8 @@ export default function CartReviewShell({ reorderItems }: CartReviewShellProps) 
               </Link>
             </div>
           ) : (
-            <table className="w-full text-left border-collapse">
-              <thead className="bg-slate-50 border-b border-gray-100">
+            <table className="w-full text-left border-collapse block md:table">
+              <thead className="bg-slate-50 border-b border-gray-100 hidden md:table-header-group">
                 <tr>
                   <th className="px-6 py-4 text-[11px] font-semibold text-gray-400 uppercase tracking-wider">
                     Product SKU
@@ -103,27 +103,31 @@ export default function CartReviewShell({ reorderItems }: CartReviewShellProps) 
                   <th className="px-6 py-4" />
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-100">
+              <tbody className="divide-y divide-gray-100 block md:table-row-group">
                 {items.map((item) => (
-                  <tr key={item.productId}>
-                    <td className="px-6 py-5 text-sm font-medium text-slate-900 align-middle">
+                  <tr key={item.productId} className="block md:table-row border-b border-gray-100 md:border-none p-4 md:p-0">
+                    <td className="flex justify-between items-center md:table-cell px-6 py-2 md:py-5 text-sm font-medium text-slate-900 align-middle">
+                      <span className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider md:hidden">Product SKU</span>
                       {item.sku}
                     </td>
-                    <td className="px-6 py-5 text-sm text-gray-500 align-middle">
+                    <td className="flex justify-between items-center md:table-cell px-6 py-2 md:py-5 text-sm text-gray-500 align-middle">
+                      <span className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider md:hidden">Description</span>
                       {item.name}
                     </td>
-                    <td className="px-6 py-5 align-middle">
+                    <td className="flex justify-between items-center md:table-cell px-6 py-2 md:py-5 align-middle">
+                      <span className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider md:hidden">Quantity</span>
                       <QuantityStepper
                         value={item.quantity}
                         onChange={(q) => updateQuantity(item.productId, q)}
                       />
                     </td>
-                    <td className="px-6 py-5 text-sm font-medium text-slate-900 text-right align-middle">
+                    <td className="flex justify-between items-center md:table-cell px-6 py-2 md:py-5 text-sm font-medium text-slate-900 md:text-right align-middle">
+                      <span className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider md:hidden">Line Total</span>
                       {ZAR.format(
                         parseFloat((item.unitPrice * item.quantity).toFixed(2))
                       )}
                     </td>
-                    <td className="px-6 py-5 align-middle">
+                    <td className="flex justify-end items-center md:table-cell px-6 py-2 md:py-5 align-middle">
                       <button
                         type="button"
                         onClick={() => removeItem(item.productId)}
@@ -141,7 +145,7 @@ export default function CartReviewShell({ reorderItems }: CartReviewShellProps) 
         </div>
 
         {/* Order summary — 4 cols */}
-        <div className="col-span-4">
+        <div className="col-span-1 lg:col-span-4">
           <div className="bg-slate-100 border border-slate-200 rounded-lg p-6 sticky top-24">
             <h2 className="text-sm font-bold text-slate-900 uppercase tracking-widest mb-6">
               Order Summary
