@@ -49,7 +49,7 @@ export default function CatalogueShell({ products }: CatalogueShellProps) {
       </div>
 
       {/* Main: product list + cart sidebar */}
-      <main className="flex-1 flex overflow-hidden">
+      <main className="flex-1 flex flex-col md:flex-row overflow-hidden">
         {/* Product list */}
         <section className="flex-1 overflow-y-auto custom-scrollbar">
           <div className="p-8">

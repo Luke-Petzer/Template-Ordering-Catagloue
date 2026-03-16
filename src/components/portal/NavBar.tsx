@@ -1,8 +1,9 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Layers } from "lucide-react";
+import { Layers, Menu, X } from "lucide-react";
 import { logoutAction } from "@/app/actions/auth";
 import type { Route } from "next";
 
@@ -13,50 +14,101 @@ const NAV_LINKS: { href: Route; label: string }[] = [
 
 export default function NavBar() {
   const pathname = usePathname();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   return (
-    <nav className="h-[64px] border-b border-gray-100 bg-white flex items-center justify-between px-8 flex-shrink-0 z-50">
-      {/* Left — brand + nav links */}
-      <div className="flex items-center gap-8">
-        <Link href={"/dashboard" as Route} className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-slate-900 rounded flex items-center justify-center">
-            <Layers className="text-white w-[18px] h-[18px]" />
+    <>
+      <nav className="h-[64px] border-b border-gray-100 bg-white flex items-center justify-between px-8 flex-shrink-0 z-50 relative">
+        {/* Left — brand + nav links */}
+        <div className="flex items-center gap-8">
+          <Link href={"/dashboard" as Route} className="flex items-center gap-2">
+            <div className="w-8 h-8 bg-slate-900 rounded flex items-center justify-center">
+              <Layers className="text-white w-[18px] h-[18px]" />
+            </div>
+            <span className="text-lg font-bold tracking-tight text-slate-900">
+              SteelSource
+            </span>
+          </Link>
+
+          {/* Desktop nav links — hidden on mobile */}
+          <div className="hidden md:flex items-center gap-8 ml-4">
+            {NAV_LINKS.map(({ href, label }) => {
+              const isActive = pathname === href || pathname.startsWith(href + "/");
+              return (
+                <Link
+                  key={href}
+                  href={href}
+                  className={[
+                    "text-sm font-medium transition-colors relative",
+                    isActive
+                      ? "text-slate-900 after:absolute after:left-0 after:right-0 after:-bottom-[22px] after:h-[2px] after:bg-slate-900"
+                      : "text-gray-400 hover:text-slate-900",
+                  ].join(" ")}
+                >
+                  {label}
+                </Link>
+              );
+            })}
           </div>
-          <span className="text-lg font-bold tracking-tight text-slate-900">
-            SteelSource
-          </span>
-        </Link>
-
-        <div className="flex items-center gap-8 ml-4">
-          {NAV_LINKS.map(({ href, label }) => {
-            const isActive = pathname === href || pathname.startsWith(href + "/");
-            return (
-              <Link
-                key={href}
-                href={href}
-                className={[
-                  "text-sm font-medium transition-colors relative",
-                  isActive
-                    ? "text-slate-900 after:absolute after:left-0 after:right-0 after:-bottom-[22px] after:h-[2px] after:bg-slate-900"
-                    : "text-gray-400 hover:text-slate-900",
-                ].join(" ")}
-              >
-                {label}
-              </Link>
-            );
-          })}
         </div>
-      </div>
 
-      {/* Right — logout */}
-      <form action={logoutAction}>
+        {/* Desktop logout — hidden on mobile */}
+        <form action={logoutAction} className="hidden md:block">
+          <button
+            type="submit"
+            className="text-xs font-semibold px-4 py-2 border border-gray-200 rounded text-gray-600 hover:bg-gray-50 transition-colors"
+          >
+            Logout
+          </button>
+        </form>
+
+        {/* Mobile hamburger toggle — hidden on desktop */}
         <button
-          type="submit"
-          className="text-xs font-semibold px-4 py-2 border border-gray-200 rounded text-gray-600 hover:bg-gray-50 transition-colors"
+          type="button"
+          className="md:hidden p-2 -mr-2 text-slate-900"
+          onClick={() => setIsMobileMenuOpen((prev) => !prev)}
+          aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
         >
-          Logout
+          {isMobileMenuOpen ? (
+            <X className="w-6 h-6" />
+          ) : (
+            <Menu className="w-6 h-6" />
+          )}
         </button>
-      </form>
-    </nav>
+      </nav>
+
+      {/* Mobile dropdown menu */}
+      {isMobileMenuOpen && (
+        <div className="md:hidden bg-white border-b border-gray-100 shadow-sm z-40">
+          <div className="flex flex-col px-8 py-4 gap-3">
+            {NAV_LINKS.map(({ href, label }) => {
+              const isActive = pathname === href || pathname.startsWith(href + "/");
+              return (
+                <Link
+                  key={href}
+                  href={href}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className={[
+                    "text-sm font-medium py-2 transition-colors",
+                    isActive ? "text-slate-900" : "text-gray-400 hover:text-slate-900",
+                  ].join(" ")}
+                >
+                  {label}
+                </Link>
+              );
+            })}
+            <form action={logoutAction} className="pt-2 border-t border-gray-100">
+              <button
+                type="submit"
+                className="text-xs font-semibold px-4 py-2 border border-gray-200 rounded text-gray-600 hover:bg-gray-50 transition-colors w-full"
+              >
+                Logout
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+    </>
   );
 }
+
