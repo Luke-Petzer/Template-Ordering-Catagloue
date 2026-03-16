@@ -16,7 +16,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { createProductAction, updateProductAction } from "@/app/actions/admin";
+import { createProductAction, updateProductAction, uploadProductImageAction } from "@/app/actions/admin";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -65,15 +65,13 @@ function FieldLabel({ children }: { children: React.ReactNode }) {
 // Image upload stub
 // ---------------------------------------------------------------------------
 
-/**
- * Stub — actual Supabase Storage upload wired in Phase 5 image step.
- * Returns a placeholder URL for now.
- */
 async function uploadProductImage(file: File): Promise<string> {
-  console.log("[ProductDrawer] uploadProductImage stub — file:", file.name, file.size);
-  // TODO: replace with actual Supabase Storage upload
-  // const { data, error } = await supabase.storage.from("product-images").upload(...)
-  return URL.createObjectURL(file); // temporary blob URL (not persisted)
+  console.log("[ProductDrawer] uploading to Supabase Storage:", file.name, file.size);
+  const fd = new FormData();
+  fd.append("file", file);
+  const result = await uploadProductImageAction(fd);
+  if ("error" in result) throw new Error(result.error);
+  return result.url;
 }
 
 // ---------------------------------------------------------------------------

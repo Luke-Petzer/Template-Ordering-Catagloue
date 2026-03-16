@@ -170,6 +170,54 @@ function csvEsc(value: string): string {
 }
 
 // ---------------------------------------------------------------------------
+// uploadProductImageAction
+// ---------------------------------------------------------------------------
+
+/**
+ * Accepts a raw File (as FormData) from the ProductDrawer,
+ * uploads it to the 'product-images' Supabase Storage bucket using the
+ * service-role client (bypasses RLS), and returns the permanent public URL.
+ *
+ * Bucket must be set to Public in Supabase Dashboard, or add a policy:
+ *   CREATE POLICY "Public read" ON storage.objects FOR SELECT USING (bucket_id = 'product-images');
+ */
+export async function uploadProductImageAction(
+  formData: FormData
+): Promise<{ url: string } | { error: string }> {
+  await requireAdmin();
+
+  const file = formData.get("file") as File | null;
+  if (!file || file.size === 0) return { error: "No file provided." };
+
+  // Sanitise filename and make it unique
+  const ext = file.name.split(".").pop()?.toLowerCase() ?? "jpg";
+  const uniqueName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+  const filePath = `products/${uniqueName}`;
+
+  // Convert File to ArrayBuffer for the server-side upload
+  const arrayBuffer = await file.arrayBuffer();
+  const buffer = Buffer.from(arrayBuffer);
+
+  const { error: uploadError } = await adminClient.storage
+    .from("product-images")
+    .upload(filePath, buffer, {
+      contentType: file.type,
+      upsert: false,
+    });
+
+  if (uploadError) {
+    console.error("[admin] uploadProductImage:", uploadError.message);
+    return { error: `Storage upload failed: ${uploadError.message}` };
+  }
+
+  const { data } = adminClient.storage
+    .from("product-images")
+    .getPublicUrl(filePath);
+
+  return { url: data.publicUrl };
+}
+
+// ---------------------------------------------------------------------------
 // createProductAction
 // ---------------------------------------------------------------------------
 
@@ -187,6 +235,7 @@ export async function createProductAction(
   const categoryId = (!categoryIdRaw || categoryIdRaw === "none") ? null : categoryIdRaw;
   const trackStock = formData.get("track_stock") === "true";
   const stockQty = parseInt(formData.get("stock_qty") as string, 10) || 0;
+  const imageUrl = (formData.get("image_url") as string | null)?.trim() || null;
 
   if (!sku || !name || isNaN(priceRaw) || priceRaw < 0) {
     return { error: "SKU, name, and a valid price are required." };
@@ -212,6 +261,17 @@ export async function createProductAction(
     console.error("[admin] createProduct:", error.message);
     if (error.code === "23505") return { error: "A product with this SKU already exists." };
     return { error: "Failed to create product. Please try again." };
+  }
+
+  // Persist the uploaded image as the primary image in the product_images table
+  if (imageUrl) {
+    const { error: imgError } = await adminClient
+      .from("product_images")
+      .insert({ product_id: data.id, url: imageUrl, is_primary: true, display_order: 0 });
+    if (imgError) {
+      console.error("[admin] insertProductImage:", imgError.message);
+      // Non-fatal: product is saved, just log the image insert failure
+    }
   }
 
   revalidatePath("/admin/products");
@@ -240,31 +300,52 @@ export async function updateProductAction(
   const trackStock = formData.get("track_stock") === "true";
   const stockQty = parseInt(formData.get("stock_qty") as string, 10) || 0;
   const isActive = formData.get("is_active") !== "false";
+  const imageUrl = (formData.get("image_url") as string | null)?.trim() || undefined;
 
   if (!sku || !name || isNaN(priceRaw) || priceRaw < 0) {
     return { error: "SKU, name, and a valid price are required." };
   }
 
+  // Build update payload — does NOT include image (handled via product_images table)
+  const updatePayload: Record<string, unknown> = {
+    sku,
+    name,
+    description,
+    details,
+    price: priceRaw,
+    category_id: categoryId,
+    track_stock: trackStock,
+    stock_qty: stockQty,
+    is_active: isActive,
+    updated_at: new Date().toISOString(),
+  };
+
   const { error } = await adminClient
     .from("products")
-    .update({
-      sku,
-      name,
-      description,
-      details,
-      price: priceRaw,
-      category_id: categoryId,
-      track_stock: trackStock,
-      stock_qty: stockQty,
-      is_active: isActive,
-      updated_at: new Date().toISOString(),
-    })
+    .update(updatePayload)
     .eq("id", id);
 
   if (error) {
     console.error("[admin] updateProduct:", error.message);
     if (error.code === "23505") return { error: "A product with this SKU already exists." };
     return { error: "Failed to update product. Please try again." };
+  }
+
+  // If a new image was uploaded, replace the current primary image
+  if (imageUrl) {
+    // Remove existing primary flag
+    await adminClient
+      .from("product_images")
+      .update({ is_primary: false })
+      .eq("product_id", id)
+      .eq("is_primary", true);
+    // Insert new primary image
+    const { error: imgError } = await adminClient
+      .from("product_images")
+      .insert({ product_id: id, url: imageUrl, is_primary: true, display_order: 0 });
+    if (imgError) {
+      console.error("[admin] updateProductImage:", imgError.message);
+    }
   }
 
   revalidatePath("/admin/products");
