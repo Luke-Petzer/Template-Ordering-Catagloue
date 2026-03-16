@@ -9,7 +9,7 @@ import { ShoppingCart, CheckCircle } from "lucide-react";
 
 const steelData = {
   name: "Equal Angle Grade Mild Steel",
-  pricePerKg: 18.5, // ZAR per Kg
+  pricePerKg: 18.5,
   dimensions: {
     "25 x 25": { "2mm": 0.777, "2.5mm": 0.954, "3mm": 1.114, "4mm": 1.773 },
     "30 x 30": { "2.5mm": 0.953, "3mm": 1.171, "4mm": 1.363, "5mm": 2.18 },
@@ -41,31 +41,24 @@ function ZoomableImage({ src, alt }: { src: string; alt: string }) {
   return (
     <div
       ref={wrapRef}
-      className="relative w-16 h-16 flex-shrink-0 cursor-zoom-in"
+      className="relative w-12 h-12 cursor-zoom-in"
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       onMouseMove={handleMouseMove}
     >
-      {/* Thumbnail */}
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={src}
         alt={alt}
-        className="w-16 h-16 object-cover rounded-lg border border-slate-200"
+        className="w-12 h-12 object-cover rounded-lg border border-slate-200"
       />
-
-      {/* Zoom panel */}
       {hovered && (
         <div
           className="absolute z-50 pointer-events-none rounded-xl overflow-hidden border-2 border-slate-300 shadow-2xl"
           style={{ left: pos.x, top: pos.y, width: 300, height: 300 }}
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={src}
-            alt={alt}
-            className="w-full h-full object-cover"
-          />
+          <img src={src} alt={alt} className="w-full h-full object-cover" />
         </div>
       )}
     </div>
@@ -73,24 +66,30 @@ function ZoomableImage({ src, alt }: { src: string; alt: string }) {
 }
 
 // ---------------------------------------------------------------------------
-// Toast
+// Success toast
 // ---------------------------------------------------------------------------
 
 function Toast({ visible }: { visible: boolean }) {
   return (
     <div
-      className={`flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white text-sm font-semibold rounded-lg shadow-lg transition-all duration-300 ${
-        visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2 pointer-events-none"
+      className={`flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 text-white text-xs font-bold rounded-lg shadow-lg transition-all duration-300 whitespace-nowrap ${
+        visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-1 pointer-events-none"
       }`}
     >
-      <CheckCircle className="w-4 h-4" />
-      Added to cart!
+      <CheckCircle className="w-3.5 h-3.5 flex-shrink-0" />
+      Added!
     </div>
   );
 }
 
 // ---------------------------------------------------------------------------
-// SteelMatrixRow — the main component
+// SteelMatrixRow — 12-column grid, same spans as header
+// col-span-1  Image
+// col-span-3  Product title
+// col-span-2  Dimension dropdown
+// col-span-2  Thickness dropdown
+// col-span-2  Length input
+// col-span-2  Price + action
 // ---------------------------------------------------------------------------
 
 export default function SteelMatrixRow() {
@@ -101,14 +100,11 @@ export default function SteelMatrixRow() {
   const [length, setLength] = useState(6);
   const [toastVisible, setToastVisible] = useState(false);
 
-  // When dimension changes, reset thickness to first available option
   const handleDimensionChange = (dim: string) => {
     setDimension(dim);
-    const firstThickness = Object.keys(steelData.dimensions[dim])[0];
-    setThickness(firstThickness);
+    setThickness(Object.keys(steelData.dimensions[dim])[0]);
   };
 
-  // Live calculations
   const kgPerMeter = steelData.dimensions[dimension]?.[thickness] ?? 0;
   const totalWeight = parseFloat((length * kgPerMeter).toFixed(3));
   const totalPrice = parseFloat((totalWeight * steelData.pricePerKg).toFixed(2));
@@ -121,38 +117,37 @@ export default function SteelMatrixRow() {
   const placeholderImage =
     "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=300&h=300&fit=crop&auto=format";
 
+  const selectClass =
+    "w-full h-9 px-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-900 cursor-pointer transition-all";
+
   return (
-    <div className="relative group bg-white border border-slate-200 rounded-2xl shadow-sm hover:shadow-md hover:border-slate-300 transition-all duration-200 p-5">
-      <div className="flex items-center gap-5 flex-wrap lg:flex-nowrap">
+    <div className="bg-white border border-slate-200 rounded-2xl shadow-sm hover:shadow-md hover:border-slate-300 transition-all duration-200 px-4 py-3">
+      <div className="grid grid-cols-12 gap-4 items-center">
 
-        {/* ── Thumbnail with hover zoom ── */}
-        <ZoomableImage src={placeholderImage} alt={steelData.name} />
+        {/* col-span-1 — Image */}
+        <div className="col-span-1 flex items-center">
+          <ZoomableImage src={placeholderImage} alt={steelData.name} />
+        </div>
 
-        {/* ── Product Title ── */}
-        <div className="min-w-[180px] flex-shrink-0">
-          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">
+        {/* col-span-3 — Product title */}
+        <div className="col-span-3">
+          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none mb-0.5">
             Structural Steel
           </p>
-          <h3 className="text-sm font-bold text-slate-900 leading-tight">
+          <p className="text-sm font-bold text-slate-900 leading-tight">
             {steelData.name}
-          </h3>
+          </p>
           <p className="text-xs text-slate-500 mt-0.5">
             {ZAR.format(steelData.pricePerKg)}/kg
           </p>
         </div>
 
-        {/* ── Divider ── */}
-        <div className="hidden lg:block h-12 w-px bg-slate-100 flex-shrink-0" />
-
-        {/* ── Dropdown 1: Dimension ── */}
-        <div className="space-y-1 flex-shrink-0">
-          <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider">
-            Dimension (mm)
-          </label>
+        {/* col-span-2 — Dimension dropdown */}
+        <div className="col-span-2">
           <select
             value={dimension}
             onChange={(e) => handleDimensionChange(e.target.value)}
-            className="h-9 px-3 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-900 cursor-pointer transition-all"
+            className={selectClass}
           >
             {dimensionKeys.map((dim) => (
               <option key={dim} value={dim}>
@@ -162,15 +157,12 @@ export default function SteelMatrixRow() {
           </select>
         </div>
 
-        {/* ── Dropdown 2: Thickness (cascades from Dimension) ── */}
-        <div className="space-y-1 flex-shrink-0">
-          <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider">
-            Thickness
-          </label>
+        {/* col-span-2 — Thickness dropdown (cascades) */}
+        <div className="col-span-2">
           <select
             value={thickness}
             onChange={(e) => setThickness(e.target.value)}
-            className="h-9 px-3 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-900 cursor-pointer transition-all"
+            className={selectClass}
           >
             {thicknessKeys.map((t) => (
               <option key={t} value={t}>
@@ -180,73 +172,41 @@ export default function SteelMatrixRow() {
           </select>
         </div>
 
-        {/* ── Input: Length ── */}
-        <div className="space-y-1 flex-shrink-0">
-          <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider">
-            Length (m)
-          </label>
+        {/* col-span-2 — Length input */}
+        <div className="col-span-2">
           <input
             type="number"
             min={0.1}
             step={0.1}
             value={length}
-            onChange={(e) => setLength(Math.max(0, parseFloat(e.target.value) || 0))}
-            className="h-9 w-24 px-3 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-900 transition-all"
+            onChange={(e) =>
+              setLength(Math.max(0, parseFloat(e.target.value) || 0))
+            }
+            className="w-full h-9 px-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-900 transition-all"
           />
         </div>
 
-        {/* ── Divider ── */}
-        <div className="hidden lg:block h-12 w-px bg-slate-100 flex-shrink-0" />
-
-        {/* ── Live Calculations ── */}
-        <div className="flex-1 min-w-[160px]">
-          <div className="bg-slate-50 rounded-xl px-4 py-3 border border-slate-100">
-            <div className="flex justify-between items-baseline gap-3">
-              <div>
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">
-                  Weight
-                </p>
-                <p className="text-lg font-bold text-slate-900 tabular-nums">
-                  {totalWeight.toFixed(2)}
-                  <span className="text-xs font-semibold text-slate-500 ml-1">kg</span>
-                </p>
-              </div>
-              <div className="text-slate-300 text-lg font-light">×</div>
-              <div>
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">
-                  Rate
-                </p>
-                <p className="text-sm font-semibold text-slate-600 tabular-nums">
-                  {ZAR.format(steelData.pricePerKg)}/kg
-                </p>
-              </div>
-              <div className="text-slate-300 text-lg font-light">=</div>
-              <div>
-                <p className="text-[10px] font-bold text-emerald-600 uppercase tracking-wider mb-0.5">
-                  Total
-                </p>
-                <p className="text-xl font-black text-emerald-700 tabular-nums">
-                  {ZAR.format(totalPrice)}
-                </p>
-              </div>
-            </div>
-            <p className="text-[10px] text-slate-400 mt-1.5">
-              {kgPerMeter} kg/m · {dimension} mm · {thickness} · {length}m
+        {/* col-span-2 — Price + Add to Cart */}
+        <div className="col-span-2 flex flex-col items-end gap-1.5">
+          <div className="text-right">
+            <p className="text-xs text-slate-500 tabular-nums">
+              {totalWeight.toFixed(2)} kg
+            </p>
+            <p className="text-base font-black text-emerald-700 tabular-nums leading-tight">
+              {ZAR.format(totalPrice)}
             </p>
           </div>
-        </div>
-
-        {/* ── Add to Cart ── */}
-        <div className="flex flex-col items-center gap-2 flex-shrink-0">
-          <button
-            type="button"
-            onClick={handleAddToCart}
-            className="h-11 px-5 bg-slate-900 hover:bg-slate-700 active:scale-[0.97] text-white text-sm font-bold rounded-xl shadow-sm flex items-center gap-2 transition-all duration-150"
-          >
-            <ShoppingCart className="w-4 h-4" />
-            Add to Cart
-          </button>
-          <Toast visible={toastVisible} />
+          <div className="flex items-center gap-2">
+            <Toast visible={toastVisible} />
+            <button
+              type="button"
+              onClick={handleAddToCart}
+              className="h-8 px-3 bg-slate-900 hover:bg-slate-700 active:scale-[0.97] text-white text-xs font-bold rounded-lg shadow-sm flex items-center gap-1.5 transition-all duration-150 whitespace-nowrap"
+            >
+              <ShoppingCart className="w-3.5 h-3.5" />
+              Add
+            </button>
+          </div>
         </div>
       </div>
     </div>

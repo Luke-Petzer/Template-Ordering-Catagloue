@@ -5,12 +5,7 @@ export const metadata = {
   description: "Cascading matrix order flow prototype for complex steel products.",
 };
 
-// ---------------------------------------------------------------------------
-// Additional static products to demonstrate the "matrix" multi-row concept
-// ---------------------------------------------------------------------------
-
 const DEMO_PRODUCTS = [
-  { id: 1, label: "Equal Angle — Grade Mild Steel" },
   { id: 2, label: "Flat Bar — Grade 300WA" },
   { id: 3, label: "Round Bar — Grade EN8" },
 ];
@@ -43,80 +38,96 @@ export default function DemoSteelPage() {
               Select dimension, thickness, and cut length. Pricing updates live.
             </p>
           </div>
-          <div className="text-right">
-            <p className="text-[11px] text-slate-400 uppercase tracking-wider font-semibold">
-              Price basis
-            </p>
-            <p className="text-sm font-bold text-slate-700 mt-0.5">Per kg · Excl. VAT</p>
-          </div>
+          <p className="text-sm font-bold text-slate-700">Per kg · Excl. VAT</p>
         </div>
       </div>
 
-      {/* ── Column Headers ── */}
+      {/* ── Column Headers — same grid as SteelMatrixRow ── */}
       <div className="max-w-7xl mx-auto px-6 mb-2">
-        <div className="hidden lg:grid grid-cols-[64px_180px_1px_120px_100px_96px_1px_1fr_160px] gap-5 items-center px-5 py-1.5">
-          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-            Image
-          </span>
-          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-            Product
-          </span>
-          <span />
-          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-            Dimension
-          </span>
-          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-            Thickness
-          </span>
-          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-            Length
-          </span>
-          <span />
-          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-            Live Pricing
-          </span>
-          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider text-right">
-            Action
-          </span>
+        <div className="grid grid-cols-12 gap-4 items-center px-4 py-1.5">
+          {/* col-span-1 */}
+          <div className="col-span-1">
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+              Image
+            </span>
+          </div>
+          {/* col-span-3 */}
+          <div className="col-span-3">
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+              Product
+            </span>
+          </div>
+          {/* col-span-2 */}
+          <div className="col-span-2">
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+              Dimension (mm)
+            </span>
+          </div>
+          {/* col-span-2 */}
+          <div className="col-span-2">
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+              Thickness
+            </span>
+          </div>
+          {/* col-span-2 */}
+          <div className="col-span-2">
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+              Length (m)
+            </span>
+          </div>
+          {/* col-span-2 */}
+          <div className="col-span-2 text-right">
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+              Price &amp; Action
+            </span>
+          </div>
         </div>
       </div>
 
       {/* ── Matrix Rows ── */}
       <div className="max-w-7xl mx-auto px-6 pb-16 space-y-3">
-        {/* Currently this prototype shows the Equal Angle product. */}
-        {/* In production, map over your products array fetched from Supabase. */}
         <SteelMatrixRow />
 
-        {/* ── Placeholder rows for visual context ── */}
-        {DEMO_PRODUCTS.slice(1).map((p) => (
+        {/* Placeholder skeleton rows */}
+        {DEMO_PRODUCTS.map((p) => (
           <div
             key={p.id}
-            className="bg-white border border-dashed border-slate-200 rounded-2xl p-5 flex items-center gap-4 opacity-40 select-none"
+            className="bg-white border border-dashed border-slate-200 rounded-2xl px-4 py-3 opacity-40 select-none"
           >
-            <div className="w-16 h-16 rounded-lg bg-slate-100 flex-shrink-0" />
-            <div className="space-y-1.5">
-              <div className="h-3 w-40 bg-slate-200 rounded-full" />
-              <div className="h-2.5 w-24 bg-slate-100 rounded-full" />
+            <div className="grid grid-cols-12 gap-4 items-center">
+              <div className="col-span-1">
+                <div className="w-12 h-12 rounded-lg bg-slate-100" />
+              </div>
+              <div className="col-span-3 space-y-1.5">
+                <div className="h-2.5 w-24 bg-slate-200 rounded-full" />
+                <div className="h-3 w-40 bg-slate-100 rounded-full" />
+              </div>
+              <div className="col-span-2">
+                <div className="h-9 w-full bg-slate-100 rounded-lg" />
+              </div>
+              <div className="col-span-2">
+                <div className="h-9 w-full bg-slate-100 rounded-lg" />
+              </div>
+              <div className="col-span-2">
+                <div className="h-9 w-full bg-slate-100 rounded-lg" />
+              </div>
+              <div className="col-span-2 flex flex-col items-end gap-1.5">
+                <div className="h-5 w-20 bg-slate-100 rounded-full" />
+                <div className="h-8 w-16 bg-slate-100 rounded-lg" />
+              </div>
             </div>
-            <div className="flex items-center gap-2 ml-auto">
-              <div className="h-9 w-24 bg-slate-100 rounded-lg" />
-              <div className="h-9 w-20 bg-slate-100 rounded-lg" />
-              <div className="h-9 w-20 bg-slate-100 rounded-lg" />
-              <div className="h-9 w-32 bg-slate-100 rounded-lg" />
-            </div>
-            <p className="text-xs text-slate-400 font-medium absolute ml-24">{p.label}</p>
           </div>
         ))}
       </div>
 
-      {/* ── Footer note ── */}
+      {/* ── Footer ── */}
       <div className="border-t border-slate-200 bg-white">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <p className="text-xs text-slate-400">
-            Prototype · Static data only · Not connected to live database
+            Prototype · Static data · Not connected to live database
           </p>
           <p className="text-xs text-slate-400">
-            Equal Angle data: SANS 50025 / EN 10025 Grade S235 / S275
+            SANS 50025 / EN 10025 Grade S235 / S275
           </p>
         </div>
       </div>
