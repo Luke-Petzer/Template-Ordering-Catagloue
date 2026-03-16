@@ -8,6 +8,7 @@ import { AuthCard } from "@/components/auth/AuthCard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Loader2 } from "lucide-react";
 import { buyerLoginAction } from "@/app/actions/auth";
 
 const schema = z.object({
@@ -70,7 +71,14 @@ export default function BuyerLoginPage() {
         </div>
 
         <Button type="submit" className="w-full" disabled={isPending}>
-          {isPending ? "Signing in…" : "Sign In"}
+          {isPending ? (
+            <>
+              <Loader2 className="w-4 h-4 animate-spin mr-2" />
+              Signing in…
+            </>
+          ) : (
+            "Sign In"
+          )}
         </Button>
 
         <p className="text-center text-xs text-muted-foreground">
