@@ -149,7 +149,7 @@ async function dispatchFulfillmentEmails(
  * Validates the cart, writes order + order_items atomically, dispatches
  * fulfillment emails, then diverges:
  *   buyer_default  → /checkout/payment?orderId=...  (EFT flow)
- *   buyer_30_day   → /checkout/confirmed?orderId=... (auto-confirmed)
+ *   buyer_30_day   → /checkout/confirmed?orderId=... (pending admin approval)
  *
  * Returns { error } on validation / DB failure (caller shows the message).
  * On success redirect() is called — function never returns to the client.
@@ -192,8 +192,7 @@ export async function checkoutAction(
   // 5. Determine role-dependent fields
   const is30Day = session.role === "buyer_30_day";
   const paymentMethod = is30Day ? ("30_day_account" as const) : ("eft" as const);
-  const initialStatus = is30Day ? ("confirmed" as const) : ("pending" as const);
-  const now = new Date().toISOString();
+  const initialStatus = "pending" as const;
 
   // 6. Insert order row
   const { data: order, error: orderError } = await adminClient
@@ -206,7 +205,6 @@ export async function checkoutAction(
       discount_amount: 0,
       vat_amount: vatAmount,
       total_amount: totalAmount,
-      ...(is30Day ? { confirmed_at: now } : {}),
     })
     .select("*")
     .single();
