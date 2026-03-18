@@ -7,10 +7,40 @@ export interface CartItem {
   productId: string;
   sku: string;
   name: string;
-  unitPrice: number;
+  unitPrice: number; // base/catalogue price — never mutated
   quantity: number;
   primaryImageUrl?: string | null;
   variantInfo?: { label: string; value: string } | null;
+  // Bulk discount metadata (Feature 2) — set when item is added to cart
+  discountType?: "percentage" | "fixed" | null;
+  discountThreshold?: number | null;
+  discountValue?: number | null;
+}
+
+/**
+ * Returns the effective per-unit price after applying any bulk discount.
+ * Returns `unitPrice` unchanged if no discount applies or threshold is not met.
+ */
+export function getEffectiveUnitPrice(item: CartItem): number {
+  if (
+    item.discountType &&
+    item.discountValue != null &&
+    item.discountThreshold != null &&
+    item.quantity >= item.discountThreshold
+  ) {
+    if (item.discountType === "percentage") {
+      return parseFloat(
+        (item.unitPrice * (1 - item.discountValue / 100)).toFixed(2)
+      );
+    }
+    if (item.discountType === "fixed") {
+      return Math.max(
+        0,
+        parseFloat((item.unitPrice - item.discountValue).toFixed(2))
+      );
+    }
+  }
+  return item.unitPrice;
 }
 
 interface CartState {
@@ -70,8 +100,12 @@ export const useCartStore = create<CartState>()(
 
       clearCart: () => set({ items: [] }),
 
+      // Uses effective (post-discount) price per item
       subtotal: () =>
-        get().items.reduce((sum, i) => sum + i.unitPrice * i.quantity, 0),
+        get().items.reduce(
+          (sum, i) => sum + getEffectiveUnitPrice(i) * i.quantity,
+          0
+        ),
     }),
     { name: "b2b-cart" }
   )
