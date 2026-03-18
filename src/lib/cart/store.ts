@@ -25,7 +25,9 @@ export function getEffectiveUnitPrice(item: CartItem): number {
   if (
     item.discountType &&
     item.discountValue != null &&
+    isFinite(item.discountValue) &&
     item.discountThreshold != null &&
+    item.discountThreshold > 0 &&
     item.quantity >= item.discountThreshold
   ) {
     if (item.discountType === "percentage") {
@@ -66,7 +68,13 @@ export const useCartStore = create<CartState>()(
             return {
               items: state.items.map((i) =>
                 i.productId === incoming.productId
-                  ? { ...i, quantity: i.quantity + (incoming.quantity ?? 1) }
+                  ? {
+                      ...i,
+                      quantity: i.quantity + (incoming.quantity ?? 1),
+                      discountType: incoming.discountType,
+                      discountThreshold: incoming.discountThreshold,
+                      discountValue: incoming.discountValue,
+                    }
                   : i
               ),
             };
