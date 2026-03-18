@@ -168,7 +168,7 @@ CREATE TABLE public.tenant_config (
   footer_text           TEXT,
   updated_at            TIMESTAMPTZ   NOT NULL DEFAULT NOW(),
 
-  CONSTRAINT singleton CHECK (id = 1)
+  CONSTRAINT tenant_config_singleton CHECK (id = 1)
 );
 
 COMMENT ON TABLE public.tenant_config IS
