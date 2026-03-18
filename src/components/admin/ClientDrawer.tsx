@@ -251,7 +251,7 @@ export default function ClientDrawer({
                   step="0.01"
                   defaultValue={client?.available_credit ?? ""}
                   placeholder="e.g. 25000.00"
-                  className="w-full h-10 px-3 bg-white border border-slate-200 rounded-lg text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-900 transition-all"
+                  className="w-full h-10 px-3 bg-white border border-slate-200 rounded-lg text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900 transition-all"
                 />
                 <p className="text-[11px] text-slate-400 mt-1.5">
                   Current available balance. Adjust manually to reflect payments received or credit resets.
