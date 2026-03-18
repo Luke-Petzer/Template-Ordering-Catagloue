@@ -12,6 +12,10 @@ interface ProductRowData {
   description: string | null;
   price: number;
   primaryImageUrl: string | null;
+  // Discount fields
+  discountType: "percentage" | "fixed" | null;
+  discountThreshold: number | null;
+  discountValue: number | null;
 }
 
 interface CatalogueShellProps {

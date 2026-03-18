@@ -12,6 +12,7 @@ export default async function DashboardPage() {
     .from("products")
     .select(
       `id, sku, name, description, price,
+       discount_type, discount_threshold, discount_value,
        product_images ( url, is_primary, display_order )`
     )
     .eq("is_active", true)
@@ -38,6 +39,9 @@ export default async function DashboardPage() {
       description: p.description as string | null,
       price: Number(p.price),
       primaryImageUrl: sorted[0]?.url ?? null,
+      discountType: (p.discount_type as "percentage" | "fixed" | null) ?? null,
+      discountThreshold: p.discount_threshold as number | null,
+      discountValue: p.discount_value != null ? Number(p.discount_value) : null,
     };
   });
 

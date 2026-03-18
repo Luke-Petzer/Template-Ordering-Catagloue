@@ -19,6 +19,10 @@ interface ProductRowProps {
   description: string | null;
   price: number;
   primaryImageUrl: string | null;
+  // Discount metadata
+  discountType: "percentage" | "fixed" | null;
+  discountThreshold: number | null;
+  discountValue: number | null;
 }
 
 export default function ProductRow({
@@ -28,12 +32,25 @@ export default function ProductRow({
   description,
   price,
   primaryImageUrl,
+  discountType,
+  discountThreshold,
+  discountValue,
 }: ProductRowProps) {
   const [qty, setQty] = useState(1);
   const addItem = useCartStore((s) => s.addItem);
 
   const handleAdd = () => {
-    addItem({ productId, sku, name, unitPrice: price, quantity: qty, primaryImageUrl });
+    addItem({
+      productId,
+      sku,
+      name,
+      unitPrice: price,
+      quantity: qty,
+      primaryImageUrl,
+      discountType,
+      discountThreshold,
+      discountValue,
+    });
   };
 
   return (
