@@ -640,3 +640,41 @@ export async function updateTenantConfigAction(
     return { error: "Failed to save settings. Please try again." };
   }
 }
+
+// ---------------------------------------------------------------------------
+// saveGlobalBannerAction
+// ---------------------------------------------------------------------------
+
+/**
+ * Upserts the global notification banner settings in the global_settings singleton.
+ * Accessible to all admin roles (no super-admin lock required).
+ */
+export async function saveGlobalBannerAction(
+  formData: FormData
+): Promise<{ error: string } | { success: true }> {
+  await requireAdmin();
+
+  const banner_message =
+    (formData.get("banner_message") as string)?.trim() || null;
+  const is_banner_active = formData.get("is_banner_active") === "true";
+
+  const { error } = await adminClient
+    .from("global_settings")
+    .update({
+      banner_message,
+      is_banner_active,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", 1);
+
+  if (error) {
+    console.error("[admin] saveGlobalBanner:", error.message);
+    return { error: "Failed to save banner settings. Please try again." };
+  }
+
+  revalidatePath("/admin/notifications");
+  // Revalidate the portal layout so the banner updates across all buyer pages
+  revalidatePath("/", "layout");
+
+  return { success: true };
+}

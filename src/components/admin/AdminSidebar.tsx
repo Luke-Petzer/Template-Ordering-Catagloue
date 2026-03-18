@@ -11,6 +11,7 @@ import {
   FileText,
   Box,
   LogOut,
+  Bell,
 } from "lucide-react";
 import type { Route } from "next";
 
@@ -35,6 +36,11 @@ const MAIN_NAV: { href: Route; label: string; icon: React.ReactNode }[] = [
     href: "/admin/clients" as Route,
     label: "Clients",
     icon: <Users className="w-[18px] h-[18px]" />,
+  },
+  {
+    href: "/admin/notifications" as Route,
+    label: "Notifications",
+    icon: <Bell className="w-[18px] h-[18px]" />,
   },
 ];
 
