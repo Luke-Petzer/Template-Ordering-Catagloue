@@ -427,6 +427,9 @@ export async function createClientAction(
   const role = formData.get("role") as "buyer_default" | "buyer_30_day";
   const vatNumber = (formData.get("vat_number") as string | null)?.trim() || null;
   const creditLimit = parseFloat(formData.get("credit_limit") as string) || null;
+  const availableCredit = formData.get("available_credit")
+    ? parseFloat(formData.get("available_credit") as string)
+    : null;
   const termsDays = parseInt(formData.get("payment_terms_days") as string, 10) || null;
   const notes = (formData.get("notes") as string | null)?.trim() || null;
 
@@ -448,6 +451,7 @@ export async function createClientAction(
       role,
       vat_number: vatNumber,
       credit_limit: creditLimit,
+      available_credit: availableCredit,
       payment_terms_days: termsDays,
       notes,
       is_active: true,
@@ -485,6 +489,11 @@ export async function updateClientAction(
   const role = formData.get("role") as "buyer_default" | "buyer_30_day";
   const vatNumber = (formData.get("vat_number") as string | null)?.trim() || null;
   const creditLimit = parseFloat(formData.get("credit_limit") as string) || null;
+  const rawAvailableCredit = formData.get("available_credit") as string | null;
+  const availableCredit =
+    rawAvailableCredit === "" || rawAvailableCredit === null
+      ? null
+      : parseFloat(rawAvailableCredit);
   const termsDays = parseInt(formData.get("payment_terms_days") as string, 10) || null;
   const notes = (formData.get("notes") as string | null)?.trim() || null;
   const isActive = formData.get("is_active") !== "false";
@@ -504,6 +513,7 @@ export async function updateClientAction(
       role,
       vat_number: vatNumber,
       credit_limit: creditLimit,
+      available_credit: availableCredit,
       payment_terms_days: termsDays,
       notes,
       is_active: isActive,
