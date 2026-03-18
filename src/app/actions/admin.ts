@@ -283,10 +283,10 @@ export async function createProductAction(
     ? parseFloat(formData.get("discount_value") as string)
     : null;
 
-  if (discountType && (!discountThreshold || !discountValue)) {
+  if (discountType && (!discountThreshold || discountValue === null)) {
     return { error: "Bulk discount requires a minimum quantity and discount value." };
   }
-  if (!discountType && (discountThreshold || discountValue)) {
+  if (!discountType && (discountThreshold || discountValue !== null)) {
     return { error: "Select a discount type or clear the discount fields." };
   }
 
@@ -369,10 +369,10 @@ export async function updateProductAction(
     ? parseFloat(formData.get("discount_value") as string)
     : null;
 
-  if (discountType && (!discountThreshold || !discountValue)) {
+  if (discountType && (!discountThreshold || discountValue === null)) {
     return { error: "Bulk discount requires a minimum quantity and discount value." };
   }
-  if (!discountType && (discountThreshold || discountValue)) {
+  if (!discountType && (discountThreshold || discountValue !== null)) {
     return { error: "Select a discount type or clear the discount fields." };
   }
 
