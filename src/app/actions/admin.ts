@@ -271,6 +271,17 @@ export async function createProductAction(
   const trackStock = formData.get("track_stock") === "true";
   const stockQty = parseInt(formData.get("stock_qty") as string, 10) || 0;
   const imageUrl = (formData.get("image_url") as string | null)?.trim() || null;
+  const discountTypeRaw = (formData.get("discount_type") as string | null)?.trim();
+  const discountType =
+    !discountTypeRaw || discountTypeRaw === "none"
+      ? null
+      : (discountTypeRaw as "percentage" | "fixed");
+  const discountThreshold = formData.get("discount_threshold")
+    ? parseInt(formData.get("discount_threshold") as string, 10)
+    : null;
+  const discountValue = formData.get("discount_value")
+    ? parseFloat(formData.get("discount_value") as string)
+    : null;
 
   if (!sku || !name || isNaN(priceRaw) || priceRaw < 0) {
     return { error: "SKU, name, and a valid price are required." };
@@ -288,6 +299,9 @@ export async function createProductAction(
       track_stock: trackStock,
       stock_qty: stockQty,
       is_active: true,
+      discount_type: discountType,
+      discount_threshold: discountThreshold,
+      discount_value: discountValue,
     })
     .select("id")
     .single();
@@ -336,6 +350,17 @@ export async function updateProductAction(
   const stockQty = parseInt(formData.get("stock_qty") as string, 10) || 0;
   const isActive = formData.get("is_active") !== "false";
   const imageUrl = (formData.get("image_url") as string | null)?.trim() || undefined;
+  const discountTypeRaw = (formData.get("discount_type") as string | null)?.trim();
+  const discountType =
+    !discountTypeRaw || discountTypeRaw === "none"
+      ? null
+      : (discountTypeRaw as "percentage" | "fixed");
+  const discountThreshold = formData.get("discount_threshold")
+    ? parseInt(formData.get("discount_threshold") as string, 10)
+    : null;
+  const discountValue = formData.get("discount_value")
+    ? parseFloat(formData.get("discount_value") as string)
+    : null;
 
   if (!sku || !name || isNaN(priceRaw) || priceRaw < 0) {
     return { error: "SKU, name, and a valid price are required." };
@@ -353,6 +378,9 @@ export async function updateProductAction(
     stock_qty: stockQty,
     is_active: isActive,
     updated_at: new Date().toISOString(),
+    discount_type: discountType,
+    discount_threshold: discountThreshold,
+    discount_value: discountValue,
   };
 
   const { error } = await adminClient

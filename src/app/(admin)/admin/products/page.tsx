@@ -9,6 +9,7 @@ export default async function AdminProductsPage() {
       .select(
         `id, sku, name, description, details, price,
          category_id, track_stock, stock_qty, is_active,
+         discount_type, discount_threshold, discount_value,
          product_images ( url, is_primary, display_order )`
       )
       .order("sku", { ascending: true }),
@@ -38,6 +39,9 @@ export default async function AdminProductsPage() {
       stock_qty: p.stock_qty,
       is_active: p.is_active,
       primaryImageUrl: primary?.url ?? null,
+      discount_type: p.discount_type as "percentage" | "fixed" | null,
+      discount_threshold: p.discount_threshold !== null ? Number(p.discount_threshold) : null,
+      discount_value: p.discount_value !== null ? Number(p.discount_value) : null,
       categoryName:
         (categories ?? []).find((c) => c.id === p.category_id)?.name ?? null,
     };
