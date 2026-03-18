@@ -65,15 +65,20 @@ export async function approveOrderAction(
   const orderId = formData.get("orderId") as string | null;
   if (!orderId) return { error: "Missing order ID." };
 
-  const { error } = await adminClient
+  const { data, error } = await adminClient
     .from("orders")
     .update({ status: "confirmed", confirmed_at: new Date().toISOString() })
     .eq("id", orderId)
-    .eq("status", "pending"); // guard: only transitions pending → confirmed
+    .eq("status", "pending") // guard: only transitions pending → confirmed
+    .select("id");
 
   if (error) {
     console.error("[admin] approveOrder:", error.message);
     return { error: "Failed to approve order. Please try again." };
+  }
+
+  if (!data || data.length === 0) {
+    return { error: "Order is no longer pending — it may have been updated by another session." };
   }
 }
 

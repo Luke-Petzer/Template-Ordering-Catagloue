@@ -102,6 +102,7 @@ function ExpandedRow({
   onApproved: (id: string) => void;
 }) {
   const [isPending, startTransition] = useTransition();
+  const [isApproving, startApprove] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const isProcessed = order.status === "fulfilled";
 
@@ -121,7 +122,7 @@ function ExpandedRow({
 
   const handleApprove = () => {
     setError(null);
-    startTransition(async () => {
+    startApprove(async () => {
       const fd = new FormData();
       fd.set("orderId", order.id);
       const result = await approveOrderAction(fd);
@@ -211,10 +212,10 @@ function ExpandedRow({
                 <button
                   type="button"
                   onClick={handleApprove}
-                  disabled={isPending}
+                  disabled={isApproving}
                   className="h-9 px-4 bg-sky-600 text-white rounded-lg text-sm font-medium hover:bg-sky-700 transition-colors shadow-sm flex items-center gap-2 disabled:opacity-40 disabled:pointer-events-none"
                 >
-                  {isPending ? (
+                  {isApproving ? (
                     <Loader2 className="w-4 h-4 animate-spin" />
                   ) : (
                     <CheckCircle className="w-4 h-4" />
