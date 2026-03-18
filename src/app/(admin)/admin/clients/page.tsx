@@ -37,6 +37,7 @@ export default async function AdminClientsPage({ searchParams }: PageProps) {
     role: c.role as "buyer_default" | "buyer_30_day",
     vat_number: c.vat_number,
     credit_limit: c.credit_limit !== null ? Number(c.credit_limit) : null,
+    available_credit: c.available_credit !== null ? Number(c.available_credit) : null,
     payment_terms_days: c.payment_terms_days,
     notes: c.notes,
     is_active: c.is_active,

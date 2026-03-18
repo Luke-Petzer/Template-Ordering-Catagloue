@@ -427,9 +427,11 @@ export async function createClientAction(
   const role = formData.get("role") as "buyer_default" | "buyer_30_day";
   const vatNumber = (formData.get("vat_number") as string | null)?.trim() || null;
   const creditLimit = parseFloat(formData.get("credit_limit") as string) || null;
-  const availableCredit = formData.get("available_credit")
-    ? parseFloat(formData.get("available_credit") as string)
-    : null;
+  const rawAvailableCredit = formData.get("available_credit") as string | null;
+  const availableCredit =
+    rawAvailableCredit === "" || rawAvailableCredit === null
+      ? null
+      : parseFloat(rawAvailableCredit);
   const termsDays = parseInt(formData.get("payment_terms_days") as string, 10) || null;
   const notes = (formData.get("notes") as string | null)?.trim() || null;
 
