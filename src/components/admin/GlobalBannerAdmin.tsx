@@ -22,6 +22,7 @@ export default function GlobalBannerAdmin({
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setStatus("idle");
+    setErrorMsg(null);
     const fd = new FormData();
     fd.set("banner_message", message);
     fd.set("is_banner_active", isActive ? "true" : "false");
@@ -87,6 +88,7 @@ export default function GlobalBannerAdmin({
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             rows={3}
+            maxLength={280}
             placeholder="e.g. Our warehouse will be closed 24–26 December. Orders placed now will ship from 2 January."
             className="w-full px-3 py-2.5 bg-white border border-slate-200 rounded-lg text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-900 transition-all resize-none"
           />

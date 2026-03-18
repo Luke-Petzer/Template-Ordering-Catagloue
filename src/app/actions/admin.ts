@@ -658,18 +658,23 @@ export async function saveGlobalBannerAction(
     (formData.get("banner_message") as string)?.trim() || null;
   const is_banner_active = formData.get("is_banner_active") === "true";
 
-  const { error } = await adminClient
+  const { data: updated, error } = await adminClient
     .from("global_settings")
     .update({
       banner_message,
       is_banner_active,
       updated_at: new Date().toISOString(),
     })
-    .eq("id", 1);
+    .eq("id", 1)
+    .select("id");
 
   if (error) {
     console.error("[admin] saveGlobalBanner:", error.message);
     return { error: "Failed to save banner settings. Please try again." };
+  }
+
+  if (!updated || updated.length === 0) {
+    return { error: "Banner settings row not found. Please run the database migration." };
   }
 
   revalidatePath("/admin/notifications");

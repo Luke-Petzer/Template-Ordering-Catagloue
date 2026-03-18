@@ -4,6 +4,10 @@ import { redirect } from "next/navigation";
 import GlobalBannerAdmin from "@/components/admin/GlobalBannerAdmin";
 import type { Route } from "next";
 
+export const metadata = {
+  title: "Notifications | Admin",
+};
+
 export default async function AdminNotificationsPage() {
   const session = await getSession();
   if (!session?.isAdmin) redirect("/admin/login" as Route);
