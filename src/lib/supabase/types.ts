@@ -118,6 +118,7 @@ export interface Database {
           mobile: string | null;
           fax: string | null;
           credit_limit: number | null;
+          available_credit: number | null;
           payment_terms_days: number | null;
           notes: string | null;
           is_active: boolean;
@@ -139,6 +140,7 @@ export interface Database {
           mobile?: string | null;
           fax?: string | null;
           credit_limit?: number | null;
+          available_credit?: number | null;
           payment_terms_days?: number | null;
           notes?: string | null;
           is_active?: boolean;
@@ -160,6 +162,7 @@ export interface Database {
           mobile?: string | null;
           fax?: string | null;
           credit_limit?: number | null;
+          available_credit?: number | null;
           payment_terms_days?: number | null;
           notes?: string | null;
           is_active?: boolean;
@@ -283,6 +286,9 @@ export interface Database {
           low_stock_alert: number | null;
           variants: Json;
           tags: string[];
+          discount_type: "percentage" | "fixed" | null;
+          discount_threshold: number | null;
+          discount_value: number | null;
           is_active: boolean;
           created_at: string;
           updated_at: string;
@@ -300,6 +306,9 @@ export interface Database {
           low_stock_alert?: number | null;
           variants?: Json;
           tags?: string[];
+          discount_type?: "percentage" | "fixed" | null;
+          discount_threshold?: number | null;
+          discount_value?: number | null;
           is_active?: boolean;
           created_at?: string;
           updated_at?: string;
@@ -317,6 +326,9 @@ export interface Database {
           low_stock_alert?: number | null;
           variants?: Json;
           tags?: string[];
+          discount_type?: "percentage" | "fixed" | null;
+          discount_threshold?: number | null;
+          discount_value?: number | null;
           is_active?: boolean;
           updated_at?: string;
         };
@@ -661,6 +673,30 @@ export interface Database {
         };
         Insert: never;
         Update: never;
+        Relationships: [];
+      };
+
+      // ----------------------------------------------------------------
+      // global_settings — singleton notification banner config
+      // ----------------------------------------------------------------
+      global_settings: {
+        Row: {
+          id: number;
+          banner_message: string | null;
+          is_banner_active: boolean;
+          updated_at: string;
+        };
+        Insert: {
+          id?: number;
+          banner_message?: string | null;
+          is_banner_active?: boolean;
+          updated_at?: string;
+        };
+        Update: {
+          banner_message?: string | null;
+          is_banner_active?: boolean;
+          updated_at?: string;
+        };
         Relationships: [];
       };
     };
