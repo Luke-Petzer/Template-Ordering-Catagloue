@@ -31,8 +31,9 @@ export function getEffectiveUnitPrice(item: CartItem): number {
     item.quantity >= item.discountThreshold
   ) {
     if (item.discountType === "percentage") {
-      return parseFloat(
-        (item.unitPrice * (1 - item.discountValue / 100)).toFixed(2)
+      return Math.max(
+        0,
+        parseFloat((item.unitPrice * (1 - item.discountValue / 100)).toFixed(2))
       );
     }
     if (item.discountType === "fixed") {
