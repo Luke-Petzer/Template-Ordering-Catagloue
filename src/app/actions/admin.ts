@@ -658,6 +658,10 @@ export async function saveGlobalBannerAction(
     (formData.get("banner_message") as string)?.trim() || null;
   const is_banner_active = formData.get("is_banner_active") === "true";
 
+  if (banner_message && banner_message.length > 280) {
+    return { error: "Banner message must be 280 characters or fewer." };
+  }
+
   const { data: updated, error } = await adminClient
     .from("global_settings")
     .update({
