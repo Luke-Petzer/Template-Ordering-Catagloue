@@ -48,6 +48,36 @@ export async function markProcessedAction(
 }
 
 // ---------------------------------------------------------------------------
+// approveOrderAction
+// ---------------------------------------------------------------------------
+
+/**
+ * Transitions a pending order to "confirmed".
+ * Does NOT call revalidatePath — mirrors markProcessedAction's pattern where
+ * the calling client component handles the optimistic UI update via callback.
+ * Guards against non-pending orders using an .eq("status", "pending") filter.
+ */
+export async function approveOrderAction(
+  formData: FormData
+): Promise<{ error: string } | void> {
+  await requireAdmin();
+
+  const orderId = formData.get("orderId") as string | null;
+  if (!orderId) return { error: "Missing order ID." };
+
+  const { error } = await adminClient
+    .from("orders")
+    .update({ status: "confirmed", confirmed_at: new Date().toISOString() })
+    .eq("id", orderId)
+    .eq("status", "pending"); // guard: only transitions pending → confirmed
+
+  if (error) {
+    console.error("[admin] approveOrder:", error.message);
+    return { error: "Failed to approve order. Please try again." };
+  }
+}
+
+// ---------------------------------------------------------------------------
 // exportOrdersCsvAction
 // ---------------------------------------------------------------------------
 
