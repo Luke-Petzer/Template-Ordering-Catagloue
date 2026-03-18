@@ -277,11 +277,18 @@ export async function createProductAction(
       ? null
       : (discountTypeRaw as "percentage" | "fixed");
   const discountThreshold = formData.get("discount_threshold")
-    ? parseInt(formData.get("discount_threshold") as string, 10)
+    ? parseInt(formData.get("discount_threshold") as string, 10) || null
     : null;
   const discountValue = formData.get("discount_value")
     ? parseFloat(formData.get("discount_value") as string)
     : null;
+
+  if (discountType && (!discountThreshold || !discountValue)) {
+    return { error: "Bulk discount requires a minimum quantity and discount value." };
+  }
+  if (!discountType && (discountThreshold || discountValue)) {
+    return { error: "Select a discount type or clear the discount fields." };
+  }
 
   if (!sku || !name || isNaN(priceRaw) || priceRaw < 0) {
     return { error: "SKU, name, and a valid price are required." };
@@ -356,11 +363,18 @@ export async function updateProductAction(
       ? null
       : (discountTypeRaw as "percentage" | "fixed");
   const discountThreshold = formData.get("discount_threshold")
-    ? parseInt(formData.get("discount_threshold") as string, 10)
+    ? parseInt(formData.get("discount_threshold") as string, 10) || null
     : null;
   const discountValue = formData.get("discount_value")
     ? parseFloat(formData.get("discount_value") as string)
     : null;
+
+  if (discountType && (!discountThreshold || !discountValue)) {
+    return { error: "Bulk discount requires a minimum quantity and discount value." };
+  }
+  if (!discountType && (discountThreshold || discountValue)) {
+    return { error: "Select a discount type or clear the discount fields." };
+  }
 
   if (!sku || !name || isNaN(priceRaw) || priceRaw < 0) {
     return { error: "SKU, name, and a valid price are required." };
