@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { ShoppingCart, X, Package } from "lucide-react";
-import { useCartStore } from "@/lib/cart/store";
+import { useCartStore, getEffectiveUnitPrice } from "@/lib/cart/store";
 import type { Route } from "next";
 
 const ZAR = new Intl.NumberFormat("en-ZA", {
@@ -73,9 +73,20 @@ export default function CartSidebar() {
                   <span className="text-[12px] text-gray-500">
                     Qty: {item.quantity}
                   </span>
-                  <span className="text-[13px] font-medium text-slate-900">
-                    {ZAR.format(item.unitPrice * item.quantity)}
-                  </span>
+                  <div className="text-right">
+                    <span className="text-[13px] font-medium text-slate-900">
+                      {ZAR.format(getEffectiveUnitPrice(item) * item.quantity)}
+                    </span>
+                    {getEffectiveUnitPrice(item) < item.unitPrice && (
+                      <p className="text-[11px] text-emerald-600 font-medium">
+                        Save{" "}
+                        {ZAR.format(
+                          (item.unitPrice - getEffectiveUnitPrice(item)) *
+                            item.quantity
+                        )}
+                      </p>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>

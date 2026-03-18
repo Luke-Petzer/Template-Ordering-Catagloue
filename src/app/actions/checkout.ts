@@ -28,6 +28,10 @@ const CartItemSchema = z.object({
     .object({ label: z.string(), value: z.string() })
     .nullable()
     .optional(),
+  // Discount metadata (UI display only — server re-fetches from DB for price computation)
+  discountType: z.enum(["percentage", "fixed"]).nullable().optional(),
+  discountThreshold: z.coerce.number().int().positive().nullable().optional(),
+  discountValue: z.coerce.number().nonnegative().nullable().optional(),
 });
 
 const CheckoutSchema = z.array(CartItemSchema).min(1, "Cart is empty");
@@ -149,7 +153,7 @@ async function dispatchFulfillmentEmails(
  * Validates the cart, writes order + order_items atomically, dispatches
  * fulfillment emails, then diverges:
  *   buyer_default  → /checkout/payment?orderId=...  (EFT flow)
- *   buyer_30_day   → /checkout/confirmed?orderId=... (auto-confirmed)
+ *   buyer_30_day   → /checkout/confirmed?orderId=... (pending admin approval)
  *
  * Returns { error } on validation / DB failure (caller shows the message).
  * On success redirect() is called — function never returns to the client.
@@ -183,19 +187,65 @@ export async function checkoutAction(
 
   const vatRate = Number(config.vat_rate ?? 0.15);
 
-  // 4. Compute financials
-  const lineTotals = items.map((item) => r2(item.unitPrice * item.quantity));
+  // 4. Re-fetch discount rules from DB for all product IDs (security: never trust client discount values)
+  const productIds = items.map((i) => i.productId);
+  const { data: productRows, error: productFetchError } = await adminClient
+    .from("products")
+    .select("id, discount_type, discount_threshold, discount_value")
+    .in("id", productIds);
+
+  if (productFetchError || !productRows) {
+    return { error: "Failed to fetch product discount data." };
+  }
+
+  // Build a lookup map
+  const discountMap = new Map(productRows.map((p) => [p.id, p]));
+
+  function computeEffectiveUnitPrice(
+    item: z.infer<typeof CartItemSchema>,
+    dbProduct: { discount_type: string | null; discount_threshold: number | null; discount_value: number | null } | undefined
+  ): number {
+    if (
+      !dbProduct ||
+      !dbProduct.discount_type ||
+      dbProduct.discount_value == null ||
+      dbProduct.discount_threshold == null ||
+      item.quantity < dbProduct.discount_threshold
+    )
+      return item.unitPrice;
+    const val = Number(dbProduct.discount_value);
+    if (!isFinite(val)) return item.unitPrice;
+    if (dbProduct.discount_type === "percentage") {
+      return Math.max(0, parseFloat((item.unitPrice * (1 - val / 100)).toFixed(2)));
+    }
+    // fixed
+    return Math.max(0, parseFloat((item.unitPrice - val).toFixed(2)));
+  }
+
+  // 5. Compute per-item effective prices and financials using DB-verified discount rules
+  const effectivePrices = items.map((item) =>
+    computeEffectiveUnitPrice(item, discountMap.get(item.productId))
+  );
+  const lineTotals = items.map((item, idx) =>
+    r2(effectivePrices[idx] * item.quantity)
+  );
   const subtotal = r2(lineTotals.reduce((s, lt) => s + lt, 0));
+  const totalDiscountAmount = r2(
+    items.reduce(
+      (acc, item, idx) =>
+        acc + r2((item.unitPrice - effectivePrices[idx]) * item.quantity),
+      0
+    )
+  );
   const vatAmount = r2(subtotal * vatRate);
   const totalAmount = r2(subtotal + vatAmount);
 
-  // 5. Determine role-dependent fields
+  // 6. Determine role-dependent fields
   const is30Day = session.role === "buyer_30_day";
   const paymentMethod = is30Day ? ("30_day_account" as const) : ("eft" as const);
-  const initialStatus = is30Day ? ("confirmed" as const) : ("pending" as const);
-  const now = new Date().toISOString();
+  const initialStatus = "pending" as const;
 
-  // 6. Insert order row
+  // 7. Insert order row
   const { data: order, error: orderError } = await adminClient
     .from("orders")
     .insert({
@@ -203,10 +253,9 @@ export async function checkoutAction(
       status: initialStatus,
       payment_method: paymentMethod,
       subtotal,
-      discount_amount: 0,
+      discount_amount: totalDiscountAmount,
       vat_amount: vatAmount,
       total_amount: totalAmount,
-      ...(is30Day ? { confirmed_at: now } : {}),
     })
     .select("*")
     .single();
@@ -216,18 +265,24 @@ export async function checkoutAction(
     return { error: "Failed to create order. Please try again." };
   }
 
-  // 7. Insert order_items
-  const orderItemRows = items.map((item, idx) => ({
-    order_id: order.id,
-    product_id: item.productId,
-    sku: item.sku,
-    product_name: item.name,
-    unit_price: item.unitPrice,
-    quantity: item.quantity,
-    discount_pct: 0,
-    line_total: lineTotals[idx],
-    variant_info: item.variantInfo ?? null,
-  }));
+  // 8. Insert order_items
+  const orderItemRows = items.map((item, idx) => {
+    const discountSaving = item.unitPrice - effectivePrices[idx];
+    const discountPct = item.unitPrice > 0
+      ? parseFloat(((discountSaving / item.unitPrice) * 100).toFixed(4))
+      : 0;
+    return {
+      order_id: order.id,
+      product_id: item.productId,
+      sku: item.sku,
+      product_name: item.name,
+      unit_price: item.unitPrice,
+      quantity: item.quantity,
+      discount_pct: discountPct,
+      line_total: lineTotals[idx],
+      variant_info: item.variantInfo ?? null,
+    };
+  });
 
   const { data: insertedItems, error: itemsError } = await adminClient
     .from("order_items")

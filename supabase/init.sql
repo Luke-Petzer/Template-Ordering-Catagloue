@@ -14,6 +14,7 @@
 DROP TRIGGER IF EXISTS trg_on_auth_user_created ON auth.users;
 
 -- Drop tables in reverse dependency order (CASCADE handles triggers/policies)
+DROP TABLE IF EXISTS public.global_settings        CASCADE;
 DROP TABLE IF EXISTS public.audit_log              CASCADE;
 DROP TABLE IF EXISTS public.buyer_sessions         CASCADE;
 DROP TABLE IF EXISTS public.payments               CASCADE;
@@ -167,7 +168,7 @@ CREATE TABLE public.tenant_config (
   footer_text           TEXT,
   updated_at            TIMESTAMPTZ   NOT NULL DEFAULT NOW(),
 
-  CONSTRAINT singleton CHECK (id = 1)
+  CONSTRAINT tenant_config_singleton CHECK (id = 1)
 );
 
 COMMENT ON TABLE public.tenant_config IS
@@ -175,6 +176,26 @@ COMMENT ON TABLE public.tenant_config IS
 
 -- Pre-insert the singleton so it always exists
 INSERT INTO public.tenant_config (id) VALUES (1) ON CONFLICT DO NOTHING;
+
+
+-- ============================================================
+-- TABLE: global_settings
+-- ============================================================
+-- Singleton row (id must always be 1).
+-- Stores portal-wide notification banner state.
+
+CREATE TABLE public.global_settings (
+  id               INT         PRIMARY KEY DEFAULT 1,
+  banner_message   TEXT,
+  is_banner_active BOOLEAN     NOT NULL DEFAULT false,
+  updated_at       TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  CONSTRAINT global_settings_singleton CHECK (id = 1)
+);
+
+COMMENT ON TABLE public.global_settings IS
+  'Singleton config row (id always = 1). Stores portal-wide notification banner state.';
+
+INSERT INTO public.global_settings (id) VALUES (1) ON CONFLICT DO NOTHING;
 
 
 -- ============================================================
@@ -205,6 +226,7 @@ CREATE TABLE public.profiles (
   fax                 TEXT,
   -- Commercial settings
   credit_limit        NUMERIC(12,2)   CHECK (credit_limit IS NULL OR credit_limit >= 0),
+  available_credit    NUMERIC(12,2)   CHECK (available_credit IS NULL OR available_credit >= 0),
   payment_terms_days  INT,            -- overrides tenant_config.payment_terms_days when set
   -- Admin-only internal notes (not visible to buyer)
   notes               TEXT,
@@ -315,6 +337,10 @@ CREATE TABLE public.products (
   -- Full-text search tags
   tags            TEXT[]        NOT NULL DEFAULT '{}',
   is_active       BOOLEAN       NOT NULL DEFAULT true,
+  -- Bulk discount engine
+  discount_type       TEXT            CHECK (discount_type IS NULL OR discount_type IN ('percentage', 'fixed')),
+  discount_threshold  INT             CHECK (discount_threshold IS NULL OR discount_threshold > 0),
+  discount_value      NUMERIC(10,2)   CHECK (discount_value IS NULL OR discount_value >= 0),
   created_at      TIMESTAMPTZ   NOT NULL DEFAULT NOW(),
   updated_at      TIMESTAMPTZ   NOT NULL DEFAULT NOW()
 );
@@ -778,6 +804,7 @@ CREATE TRIGGER trg_audit_orders
 -- ============================================================
 
 ALTER TABLE public.tenant_config          ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.global_settings        ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.profiles               ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.addresses              ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.categories             ENABLE ROW LEVEL SECURITY;
@@ -802,6 +829,24 @@ CREATE POLICY "all_read_tenant_config"
 CREATE POLICY "admins_update_tenant_config"
   ON public.tenant_config FOR UPDATE TO authenticated
   USING (public.is_admin()) WITH CHECK (public.is_admin());
+
+
+-- ------------------------------------------------------------
+-- RLS: global_settings
+-- ------------------------------------------------------------
+
+CREATE POLICY "admins_manage_global_settings"
+  ON public.global_settings
+  FOR ALL
+  TO authenticated
+  USING (public.is_admin())
+  WITH CHECK (public.is_admin());
+
+CREATE POLICY "authenticated_read_global_settings"
+  ON public.global_settings
+  FOR SELECT
+  TO authenticated
+  USING (true);
 
 
 -- ------------------------------------------------------------
@@ -1039,7 +1084,7 @@ CREATE POLICY "admins_select_audit_log"
 -- END OF SCRIPT
 -- ============================================================
 -- After running:
---   1. Verify all 12 tables appear in the Table Editor.
+--   1. Verify all 13 tables appear in the Table Editor.
 --   2. Create your first admin via Supabase Auth dashboard with metadata:
 --      { "role": "admin", "business_name": "Your Business", "contact_name": "Your Name" }
 --   3. The trg_on_auth_user_created trigger will auto-create the profile row.

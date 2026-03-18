@@ -8,7 +8,7 @@ import {
   CheckCircle,
   Loader2,
 } from "lucide-react";
-import { markProcessedAction, exportOrdersCsvAction } from "@/app/actions/admin";
+import { markProcessedAction, approveOrderAction, exportOrdersCsvAction } from "@/app/actions/admin";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -95,11 +95,14 @@ function StatusBadge({ status }: { status: string }) {
 function ExpandedRow({
   order,
   onMarked,
+  onApproved,
 }: {
   order: OrderRow;
   onMarked: (id: string) => void;
+  onApproved: (id: string) => void;
 }) {
   const [isPending, startTransition] = useTransition();
+  const [isApproving, startApprove] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const isProcessed = order.status === "fulfilled";
 
@@ -113,6 +116,20 @@ function ExpandedRow({
         setError(result.error);
       } else {
         onMarked(order.id);
+      }
+    });
+  };
+
+  const handleApprove = () => {
+    setError(null);
+    startApprove(async () => {
+      const fd = new FormData();
+      fd.set("orderId", order.id);
+      const result = await approveOrderAction(fd);
+      if (result?.error) {
+        setError(result.error);
+      } else {
+        onApproved(order.id);
       }
     });
   };
@@ -190,6 +207,22 @@ function ExpandedRow({
               {error && (
                 <span className="text-xs text-red-600">{error}</span>
               )}
+              {/* Approve Order — visible for pending orders only */}
+              {order.status === "pending" && (
+                <button
+                  type="button"
+                  onClick={handleApprove}
+                  disabled={isApproving}
+                  className="h-9 px-4 bg-sky-600 text-white rounded-lg text-sm font-medium hover:bg-sky-700 transition-colors shadow-sm flex items-center gap-2 disabled:opacity-40 disabled:pointer-events-none"
+                >
+                  {isApproving ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <CheckCircle className="w-4 h-4" />
+                  )}
+                  Approve Order
+                </button>
+              )}
               <button
                 type="button"
                 onClick={handleMark}
@@ -239,6 +272,12 @@ export default function OrderLedger({
   const handleMarked = useCallback((orderId: string) => {
     setOrders((prev) =>
       prev.map((o) => (o.id === orderId ? { ...o, status: "fulfilled" } : o))
+    );
+  }, []);
+
+  const handleApproved = useCallback((orderId: string) => {
+    setOrders((prev) =>
+      prev.map((o) => (o.id === orderId ? { ...o, status: "confirmed" } : o))
     );
   }, []);
 
@@ -373,6 +412,7 @@ export default function OrderLedger({
                     <ExpandedRow
                       order={order}
                       onMarked={handleMarked}
+                      onApproved={handleApproved}
                     />
                   )}
                 </React.Fragment>

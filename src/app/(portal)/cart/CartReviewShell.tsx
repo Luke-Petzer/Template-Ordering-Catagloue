@@ -3,7 +3,7 @@
 import { useEffect, useState, useTransition } from "react";
 import Link from "next/link";
 import { Info, Loader2, Trash2 } from "lucide-react";
-import { useCartStore } from "@/lib/cart/store";
+import { useCartStore, getEffectiveUnitPrice } from "@/lib/cart/store";
 import QuantityStepper from "@/components/portal/QuantityStepper";
 import { checkoutAction } from "@/app/actions/checkout";
 
@@ -123,9 +123,20 @@ export default function CartReviewShell({ reorderItems }: CartReviewShellProps) 
                     </td>
                     <td className="flex justify-between items-center md:table-cell px-6 py-2 md:py-5 text-sm font-medium text-slate-900 md:text-right align-middle">
                       <span className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider md:hidden">Line Total</span>
-                      {ZAR.format(
-                        parseFloat((item.unitPrice * item.quantity).toFixed(2))
-                      )}
+                      <div className="md:text-right">
+                        <span>
+                          {ZAR.format(
+                            parseFloat(
+                              (getEffectiveUnitPrice(item) * item.quantity).toFixed(2)
+                            )
+                          )}
+                        </span>
+                        {getEffectiveUnitPrice(item) < item.unitPrice && (
+                          <p className="text-xs text-emerald-600 font-medium mt-0.5">
+                            Bulk discount applied
+                          </p>
+                        )}
+                      </div>
                     </td>
                     <td className="flex justify-end items-center md:table-cell px-6 py-2 md:py-5 align-middle">
                       <button
@@ -158,6 +169,22 @@ export default function CartReviewShell({ reorderItems }: CartReviewShellProps) 
                   {ZAR.format(sub)}
                 </span>
               </div>
+              {items.some((i) => getEffectiveUnitPrice(i) < i.unitPrice) && (
+                <div className="flex justify-between items-center text-emerald-700">
+                  <span className="text-sm">Bulk Discount Savings</span>
+                  <span className="text-sm font-medium">
+                    -
+                    {ZAR.format(
+                      items.reduce(
+                        (acc, i) =>
+                          acc +
+                          (i.unitPrice - getEffectiveUnitPrice(i)) * i.quantity,
+                        0
+                      )
+                    )}
+                  </span>
+                </div>
+              )}
               <div className="flex justify-between items-center">
                 <span className="text-sm text-gray-500">VAT (15%)</span>
                 <span className="text-sm font-medium text-slate-900">

@@ -48,6 +48,41 @@ export async function markProcessedAction(
 }
 
 // ---------------------------------------------------------------------------
+// approveOrderAction
+// ---------------------------------------------------------------------------
+
+/**
+ * Transitions a pending order to "confirmed".
+ * Does NOT call revalidatePath — mirrors markProcessedAction's pattern where
+ * the calling client component handles the optimistic UI update via callback.
+ * Guards against non-pending orders using an .eq("status", "pending") filter.
+ */
+export async function approveOrderAction(
+  formData: FormData
+): Promise<{ error: string } | void> {
+  await requireAdmin();
+
+  const orderId = formData.get("orderId") as string | null;
+  if (!orderId) return { error: "Missing order ID." };
+
+  const { data, error } = await adminClient
+    .from("orders")
+    .update({ status: "confirmed", confirmed_at: new Date().toISOString() })
+    .eq("id", orderId)
+    .eq("status", "pending") // guard: only transitions pending → confirmed
+    .select("id");
+
+  if (error) {
+    console.error("[admin] approveOrder:", error.message);
+    return { error: "Failed to approve order. Please try again." };
+  }
+
+  if (!data || data.length === 0) {
+    return { error: "Order is no longer pending — it may have been updated by another session." };
+  }
+}
+
+// ---------------------------------------------------------------------------
 // exportOrdersCsvAction
 // ---------------------------------------------------------------------------
 
@@ -170,6 +205,54 @@ function csvEsc(value: string): string {
 }
 
 // ---------------------------------------------------------------------------
+// uploadProductImageAction
+// ---------------------------------------------------------------------------
+
+/**
+ * Accepts a raw File (as FormData) from the ProductDrawer,
+ * uploads it to the 'product-images' Supabase Storage bucket using the
+ * service-role client (bypasses RLS), and returns the permanent public URL.
+ *
+ * Bucket must be set to Public in Supabase Dashboard, or add a policy:
+ *   CREATE POLICY "Public read" ON storage.objects FOR SELECT USING (bucket_id = 'product-images');
+ */
+export async function uploadProductImageAction(
+  formData: FormData
+): Promise<{ url: string } | { error: string }> {
+  await requireAdmin();
+
+  const file = formData.get("file") as File | null;
+  if (!file || file.size === 0) return { error: "No file provided." };
+
+  // Sanitise filename and make it unique
+  const ext = file.name.split(".").pop()?.toLowerCase() ?? "jpg";
+  const uniqueName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+  const filePath = `products/${uniqueName}`;
+
+  // Convert File to ArrayBuffer for the server-side upload
+  const arrayBuffer = await file.arrayBuffer();
+  const buffer = Buffer.from(arrayBuffer);
+
+  const { error: uploadError } = await adminClient.storage
+    .from("product-images")
+    .upload(filePath, buffer, {
+      contentType: file.type,
+      upsert: false,
+    });
+
+  if (uploadError) {
+    console.error("[admin] uploadProductImage:", uploadError.message);
+    return { error: `Storage upload failed: ${uploadError.message}` };
+  }
+
+  const { data } = adminClient.storage
+    .from("product-images")
+    .getPublicUrl(filePath);
+
+  return { url: data.publicUrl };
+}
+
+// ---------------------------------------------------------------------------
 // createProductAction
 // ---------------------------------------------------------------------------
 
@@ -187,6 +270,25 @@ export async function createProductAction(
   const categoryId = (!categoryIdRaw || categoryIdRaw === "none") ? null : categoryIdRaw;
   const trackStock = formData.get("track_stock") === "true";
   const stockQty = parseInt(formData.get("stock_qty") as string, 10) || 0;
+  const imageUrl = (formData.get("image_url") as string | null)?.trim() || null;
+  const discountTypeRaw = (formData.get("discount_type") as string | null)?.trim();
+  const discountType =
+    !discountTypeRaw || discountTypeRaw === "none"
+      ? null
+      : (discountTypeRaw as "percentage" | "fixed");
+  const discountThreshold = formData.get("discount_threshold")
+    ? parseInt(formData.get("discount_threshold") as string, 10) || null
+    : null;
+  const discountValue = formData.get("discount_value")
+    ? parseFloat(formData.get("discount_value") as string)
+    : null;
+
+  if (discountType && (!discountThreshold || discountValue === null)) {
+    return { error: "Bulk discount requires a minimum quantity and discount value." };
+  }
+  if (!discountType && (discountThreshold || discountValue !== null)) {
+    return { error: "Select a discount type or clear the discount fields." };
+  }
 
   if (!sku || !name || isNaN(priceRaw) || priceRaw < 0) {
     return { error: "SKU, name, and a valid price are required." };
@@ -204,6 +306,9 @@ export async function createProductAction(
       track_stock: trackStock,
       stock_qty: stockQty,
       is_active: true,
+      discount_type: discountType,
+      discount_threshold: discountThreshold,
+      discount_value: discountValue,
     })
     .select("id")
     .single();
@@ -212,6 +317,17 @@ export async function createProductAction(
     console.error("[admin] createProduct:", error.message);
     if (error.code === "23505") return { error: "A product with this SKU already exists." };
     return { error: "Failed to create product. Please try again." };
+  }
+
+  // Persist the uploaded image as the primary image in the product_images table
+  if (imageUrl) {
+    const { error: imgError } = await adminClient
+      .from("product_images")
+      .insert({ product_id: data.id, url: imageUrl, is_primary: true, display_order: 0 });
+    if (imgError) {
+      console.error("[admin] insertProductImage:", imgError.message);
+      // Non-fatal: product is saved, just log the image insert failure
+    }
   }
 
   revalidatePath("/admin/products");
@@ -240,31 +356,73 @@ export async function updateProductAction(
   const trackStock = formData.get("track_stock") === "true";
   const stockQty = parseInt(formData.get("stock_qty") as string, 10) || 0;
   const isActive = formData.get("is_active") !== "false";
+  const imageUrl = (formData.get("image_url") as string | null)?.trim() || undefined;
+  const discountTypeRaw = (formData.get("discount_type") as string | null)?.trim();
+  const discountType =
+    !discountTypeRaw || discountTypeRaw === "none"
+      ? null
+      : (discountTypeRaw as "percentage" | "fixed");
+  const discountThreshold = formData.get("discount_threshold")
+    ? parseInt(formData.get("discount_threshold") as string, 10) || null
+    : null;
+  const discountValue = formData.get("discount_value")
+    ? parseFloat(formData.get("discount_value") as string)
+    : null;
+
+  if (discountType && (!discountThreshold || discountValue === null)) {
+    return { error: "Bulk discount requires a minimum quantity and discount value." };
+  }
+  if (!discountType && (discountThreshold || discountValue !== null)) {
+    return { error: "Select a discount type or clear the discount fields." };
+  }
 
   if (!sku || !name || isNaN(priceRaw) || priceRaw < 0) {
     return { error: "SKU, name, and a valid price are required." };
   }
 
+  // Build update payload — does NOT include image (handled via product_images table)
+  const updatePayload: Record<string, unknown> = {
+    sku,
+    name,
+    description,
+    details,
+    price: priceRaw,
+    category_id: categoryId,
+    track_stock: trackStock,
+    stock_qty: stockQty,
+    is_active: isActive,
+    updated_at: new Date().toISOString(),
+    discount_type: discountType,
+    discount_threshold: discountThreshold,
+    discount_value: discountValue,
+  };
+
   const { error } = await adminClient
     .from("products")
-    .update({
-      sku,
-      name,
-      description,
-      details,
-      price: priceRaw,
-      category_id: categoryId,
-      track_stock: trackStock,
-      stock_qty: stockQty,
-      is_active: isActive,
-      updated_at: new Date().toISOString(),
-    })
+    .update(updatePayload)
     .eq("id", id);
 
   if (error) {
     console.error("[admin] updateProduct:", error.message);
     if (error.code === "23505") return { error: "A product with this SKU already exists." };
     return { error: "Failed to update product. Please try again." };
+  }
+
+  // If a new image was uploaded, replace the current primary image
+  if (imageUrl) {
+    // Remove existing primary flag
+    await adminClient
+      .from("product_images")
+      .update({ is_primary: false })
+      .eq("product_id", id)
+      .eq("is_primary", true);
+    // Insert new primary image
+    const { error: imgError } = await adminClient
+      .from("product_images")
+      .insert({ product_id: id, url: imageUrl, is_primary: true, display_order: 0 });
+    if (imgError) {
+      console.error("[admin] updateProductImage:", imgError.message);
+    }
   }
 
   revalidatePath("/admin/products");
@@ -311,6 +469,11 @@ export async function createClientAction(
   const role = formData.get("role") as "buyer_default" | "buyer_30_day";
   const vatNumber = (formData.get("vat_number") as string | null)?.trim() || null;
   const creditLimit = parseFloat(formData.get("credit_limit") as string) || null;
+  const rawAvailableCredit = formData.get("available_credit") as string | null;
+  const availableCredit =
+    rawAvailableCredit === "" || rawAvailableCredit === null
+      ? null
+      : parseFloat(rawAvailableCredit);
   const termsDays = parseInt(formData.get("payment_terms_days") as string, 10) || null;
   const notes = (formData.get("notes") as string | null)?.trim() || null;
 
@@ -332,6 +495,7 @@ export async function createClientAction(
       role,
       vat_number: vatNumber,
       credit_limit: creditLimit,
+      available_credit: availableCredit,
       payment_terms_days: termsDays,
       notes,
       is_active: true,
@@ -369,6 +533,11 @@ export async function updateClientAction(
   const role = formData.get("role") as "buyer_default" | "buyer_30_day";
   const vatNumber = (formData.get("vat_number") as string | null)?.trim() || null;
   const creditLimit = parseFloat(formData.get("credit_limit") as string) || null;
+  const rawAvailableCredit = formData.get("available_credit") as string | null;
+  const availableCredit =
+    rawAvailableCredit === "" || rawAvailableCredit === null
+      ? null
+      : parseFloat(rawAvailableCredit);
   const termsDays = parseInt(formData.get("payment_terms_days") as string, 10) || null;
   const notes = (formData.get("notes") as string | null)?.trim() || null;
   const isActive = formData.get("is_active") !== "false";
@@ -388,6 +557,7 @@ export async function updateClientAction(
       role,
       vat_number: vatNumber,
       credit_limit: creditLimit,
+      available_credit: availableCredit,
       payment_terms_days: termsDays,
       notes,
       is_active: isActive,
@@ -469,4 +639,51 @@ export async function updateTenantConfigAction(
     console.error("[admin] updateTenantConfig:", error.message);
     return { error: "Failed to save settings. Please try again." };
   }
+}
+
+// ---------------------------------------------------------------------------
+// saveGlobalBannerAction
+// ---------------------------------------------------------------------------
+
+/**
+ * Upserts the global notification banner settings in the global_settings singleton.
+ * Accessible to all admin roles (no super-admin lock required).
+ */
+export async function saveGlobalBannerAction(
+  formData: FormData
+): Promise<{ error: string } | { success: true }> {
+  await requireAdmin();
+
+  const banner_message =
+    (formData.get("banner_message") as string)?.trim() || null;
+  const is_banner_active = formData.get("is_banner_active") === "true";
+
+  if (banner_message && banner_message.length > 280) {
+    return { error: "Banner message must be 280 characters or fewer." };
+  }
+
+  const { data: updated, error } = await adminClient
+    .from("global_settings")
+    .update({
+      banner_message,
+      is_banner_active,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", 1)
+    .select("id");
+
+  if (error) {
+    console.error("[admin] saveGlobalBanner:", error.message);
+    return { error: "Failed to save banner settings. Please try again." };
+  }
+
+  if (!updated || updated.length === 0) {
+    return { error: "Banner settings row not found. Please run the database migration." };
+  }
+
+  revalidatePath("/admin/notifications");
+  // Revalidate the portal layout so the banner updates across all buyer pages
+  revalidatePath("/", "layout");
+
+  return { success: true };
 }

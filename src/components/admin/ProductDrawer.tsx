@@ -16,7 +16,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { createProductAction, updateProductAction } from "@/app/actions/admin";
+import { createProductAction, updateProductAction, uploadProductImageAction } from "@/app/actions/admin";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -34,6 +34,10 @@ export interface ProductForDrawer {
   stock_qty: number;
   is_active: boolean;
   primaryImageUrl: string | null;
+  // Discount fields
+  discount_type: "percentage" | "fixed" | null;
+  discount_threshold: number | null;
+  discount_value: number | null;
 }
 
 export interface CategoryOption {
@@ -65,15 +69,13 @@ function FieldLabel({ children }: { children: React.ReactNode }) {
 // Image upload stub
 // ---------------------------------------------------------------------------
 
-/**
- * Stub — actual Supabase Storage upload wired in Phase 5 image step.
- * Returns a placeholder URL for now.
- */
 async function uploadProductImage(file: File): Promise<string> {
-  console.log("[ProductDrawer] uploadProductImage stub — file:", file.name, file.size);
-  // TODO: replace with actual Supabase Storage upload
-  // const { data, error } = await supabase.storage.from("product-images").upload(...)
-  return URL.createObjectURL(file); // temporary blob URL (not persisted)
+  console.log("[ProductDrawer] uploading to Supabase Storage:", file.name, file.size);
+  const fd = new FormData();
+  fd.append("file", file);
+  const result = await uploadProductImageAction(fd);
+  if ("error" in result) throw new Error(result.error);
+  return result.url;
 }
 
 // ---------------------------------------------------------------------------
@@ -332,6 +334,62 @@ export default function ProductDrawer({
                 placeholder="Dimensions, grades, standards…"
                 className="text-sm border-slate-200 focus:ring-slate-900/10 focus:border-slate-900 resize-none"
               />
+            </div>
+
+            {/* Bulk Discount */}
+            <div className="space-y-4 pt-2 border-t border-slate-100">
+              <div>
+                <p className="text-xs font-semibold text-slate-700 uppercase tracking-wider">
+                  Bulk Discount
+                </p>
+                <p className="text-[11px] text-slate-400 mt-0.5">
+                  Optional. Applied automatically when buyer meets the minimum quantity.
+                </p>
+              </div>
+
+              <div className="space-y-1.5">
+                <FieldLabel>Discount Type</FieldLabel>
+                <Select
+                  name="discount_type"
+                  defaultValue={product?.discount_type ?? "none"}
+                >
+                  <SelectTrigger className="h-10 text-sm border-slate-200 focus:ring-slate-900/10 focus:border-slate-900">
+                    <SelectValue placeholder="No discount" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">No discount</SelectItem>
+                    <SelectItem value="percentage">Percentage (%)</SelectItem>
+                    <SelectItem value="fixed">Fixed Amount (R)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <FieldLabel>Min. Quantity</FieldLabel>
+                  <input
+                    type="number"
+                    name="discount_threshold"
+                    min={1}
+                    step={1}
+                    defaultValue={product?.discount_threshold ?? ""}
+                    placeholder="e.g. 10"
+                    className="w-full h-10 px-3 bg-white border border-slate-200 rounded-lg text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-900 transition-all"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <FieldLabel>Discount Value</FieldLabel>
+                  <input
+                    type="number"
+                    name="discount_value"
+                    min={0}
+                    step="0.01"
+                    defaultValue={product?.discount_value ?? ""}
+                    placeholder="e.g. 15"
+                    className="w-full h-10 px-3 bg-white border border-slate-200 rounded-lg text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-900 transition-all"
+                  />
+                </div>
+              </div>
             </div>
 
             {/* Stock tracking */}
