@@ -341,7 +341,7 @@ export async function createProductAction(
 export async function updateProductAction(
   formData: FormData
 ): Promise<{ error: string } | void> {
-  await requireAdmin();
+  const session = await requireAdmin();
 
   const id = formData.get("id") as string | null;
   if (!id) return { error: "Missing product ID." };
@@ -380,6 +380,13 @@ export async function updateProductAction(
     return { error: "SKU, name, and a valid price are required." };
   }
 
+  // Fetch current state so we can detect price / details changes for the audit log
+  const { data: oldProduct } = await adminClient
+    .from("products")
+    .select("price, details")
+    .eq("id", id)
+    .single();
+
   // Build update payload — does NOT include image (handled via product_images table)
   const updatePayload: Record<string, unknown> = {
     sku,
@@ -406,6 +413,38 @@ export async function updateProductAction(
     console.error("[admin] updateProduct:", error.message);
     if (error.code === "23505") return { error: "A product with this SKU already exists." };
     return { error: "Failed to update product. Please try again." };
+  }
+
+  // Audit log: record if price or details changed.
+  // audit_log.Insert is typed `never` (app-level convention — inserts are normally
+  // handled by DB triggers). The service-role client bypasses RLS so we can write
+  // directly; we suppress the type error here intentionally.
+  const priceChanged = oldProduct && Number(oldProduct.price) !== priceRaw;
+  const detailsChanged = oldProduct && (oldProduct.details ?? null) !== (details ?? null);
+  if (priceChanged || detailsChanged) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { error: auditError } = await (adminClient as any).from("audit_log").insert({
+      actor_id: session!.profileId,
+      action: "UPDATE",
+      table_name: "products",
+      record_id: id,
+      old_data: {
+        price: oldProduct?.price,
+        details: oldProduct?.details ?? null,
+      },
+      new_data: {
+        price: priceRaw,
+        details: details ?? null,
+        _changed_fields: [
+          ...(priceChanged ? ["price"] : []),
+          ...(detailsChanged ? ["details"] : []),
+        ],
+      },
+    });
+    if (auditError) {
+      console.error("[admin] updateProduct audit log:", auditError.message);
+      // Non-fatal: product is already saved, just log the failure
+    }
   }
 
   // If a new image was uploaded, replace the current primary image
@@ -685,5 +724,66 @@ export async function saveGlobalBannerAction(
   // Revalidate the portal layout so the banner updates across all buyer pages
   revalidatePath("/", "layout");
 
+  return { success: true };
+}
+
+// ---------------------------------------------------------------------------
+// inviteStaffAction
+// ---------------------------------------------------------------------------
+
+/**
+ * Sends a Supabase Auth invite email to a new admin user.
+ * The handle_new_admin_user() trigger creates the profile row automatically
+ * when the invite is accepted and the auth.users row is finalised.
+ *
+ * Super-admin locked: only ADMIN_SUPER_EMAIL may call this action.
+ */
+export async function inviteStaffAction(
+  formData: FormData
+): Promise<{ error: string } | { success: true }> {
+  await requireAdmin();
+
+  // Super-admin lock
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const superEmail = process.env.ADMIN_SUPER_EMAIL;
+  if (!superEmail || user?.email !== superEmail) {
+    return { error: "Only the super admin can invite new staff members." };
+  }
+
+  const email = (formData.get("email") as string).trim().toLowerCase();
+  const contactName = (formData.get("contact_name") as string).trim();
+
+  if (!email || !contactName) {
+    return { error: "Name and email are required." };
+  }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    return { error: "Please enter a valid email address." };
+  }
+
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "";
+
+  const { error: inviteError } = await adminClient.auth.admin.inviteUserByEmail(
+    email,
+    {
+      data: {
+        role: "admin",
+        contact_name: contactName,
+      },
+      redirectTo: siteUrl ? `${siteUrl}/admin/login` : undefined,
+    }
+  );
+
+  if (inviteError) {
+    console.error("[admin] inviteStaff:", inviteError.message);
+    if (inviteError.message.toLowerCase().includes("already")) {
+      return { error: "An account with this email already exists." };
+    }
+    return { error: `Invite failed: ${inviteError.message}` };
+  }
+
+  revalidatePath("/admin/staff");
   return { success: true };
 }
