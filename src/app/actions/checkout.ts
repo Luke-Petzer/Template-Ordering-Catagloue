@@ -264,9 +264,8 @@ export async function checkoutAction(
       discount_amount: totalDiscountAmount,
       vat_amount: vatAmount,
       total_amount: totalAmount,
-      // order_notes column added via migration — types will regenerate on next supabase gen
       order_notes: trimmedNotes,
-    } as any)
+    })
     .select("*")
     .single();
 

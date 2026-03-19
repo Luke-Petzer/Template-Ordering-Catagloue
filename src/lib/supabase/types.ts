@@ -402,6 +402,7 @@ export interface Database {
           buyer_reference: string | null;
           delivery_instructions: string | null;
           notes: string | null;
+          order_notes: string | null;
           confirmed_at: string | null;
           fulfilled_at: string | null;
           cancelled_at: string | null;
@@ -422,6 +423,7 @@ export interface Database {
           buyer_reference?: string | null;
           delivery_instructions?: string | null;
           notes?: string | null;
+          order_notes?: string | null;
           confirmed_at?: string | null;
           fulfilled_at?: string | null;
           cancelled_at?: string | null;
@@ -442,6 +444,7 @@ export interface Database {
           buyer_reference?: string | null;
           delivery_instructions?: string | null;
           notes?: string | null;
+          order_notes?: string | null;
           confirmed_at?: string | null;
           fulfilled_at?: string | null;
           cancelled_at?: string | null;
