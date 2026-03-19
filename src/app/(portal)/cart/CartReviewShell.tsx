@@ -230,20 +230,20 @@ export default function CartReviewShell({ reorderItems }: CartReviewShellProps) 
               </div>
             </div>
 
-            {/* Delivery Instructions */}
+            {/* Order Notes */}
             <div className="mb-6">
               <label
                 htmlFor="order_notes"
                 className="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1.5"
               >
-                Delivery Instructions (optional)
+                Order Notes & Special Requests (optional)
               </label>
               <textarea
                 id="order_notes"
                 name="order_notes"
                 value={orderNotes}
                 onChange={(e) => setOrderNotes(e.target.value)}
-                placeholder="e.g. Leave at back entrance, call before delivery…"
+                placeholder="e.g. Delivery preferences, pricing discussions, or custom material requests..."
                 maxLength={1000}
                 className="w-full min-h-[80px] resize-none rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent transition-all"
               />

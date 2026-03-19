@@ -198,11 +198,11 @@ function ExpandedRow({
             </table>
           </div>
 
-          {/* Delivery Instructions */}
+          {/* Order Notes */}
           {order.order_notes && (
             <div className="mt-4 bg-amber-50 border border-amber-100 rounded-lg p-3">
               <p className="text-[11px] font-semibold text-amber-700 uppercase tracking-wider mb-1">
-                Delivery Instructions
+                Order Notes & Special Requests
               </p>
               <p className="text-sm text-slate-700">{order.order_notes}</p>
             </div>

@@ -64,10 +64,10 @@ export default function NavBar() {
                   key={href}
                   href={href}
                   className={[
-                    "text-sm font-medium transition-colors relative",
+                    "text-sm font-medium transition-colors border-b-2 pb-0.5",
                     isActive
-                      ? "text-slate-900 after:absolute after:left-0 after:right-0 after:-bottom-[22px] after:h-[2px] after:bg-slate-900"
-                      : "text-gray-400 hover:text-slate-900",
+                      ? "text-gray-900 border-gray-900"
+                      : "text-gray-700 border-transparent hover:border-gray-300",
                   ].join(" ")}
                 >
                   {label}
@@ -134,8 +134,10 @@ export default function NavBar() {
                   href={href}
                   onClick={() => setIsMobileMenuOpen(false)}
                   className={[
-                    "text-sm font-medium py-2 transition-colors",
-                    isActive ? "text-slate-900" : "text-gray-400 hover:text-slate-900",
+                    "text-sm font-medium py-2 transition-colors border-b-2",
+                    isActive
+                      ? "text-gray-900 border-gray-900"
+                      : "text-gray-700 border-transparent hover:border-gray-300",
                   ].join(" ")}
                 >
                   {label}
