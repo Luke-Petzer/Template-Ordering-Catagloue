@@ -117,7 +117,7 @@ export default function CatalogueShell({ products, categories }: CatalogueShellP
 
   return (
     <>
-      {/* SKU Search Bar */}
+      {/* SKU Search Bar — must be flex-shrink-0 so it never compresses the scrollable section */}
       <div className="bg-white border-b border-gray-100 flex-shrink-0">
         <div className="flex items-center px-6 md:px-8 h-[40px]">
           <Search className="w-4 h-4 text-gray-400 mr-3 flex-shrink-0" />
@@ -199,7 +199,7 @@ export default function CatalogueShell({ products, categories }: CatalogueShellP
                       <h2 className="text-base font-semibold text-slate-500 uppercase tracking-wider mb-3">
                         {group.name}
                       </h2>
-                      <div className="border border-gray-100 rounded-xl overflow-hidden">
+                      <div className="border border-gray-100 rounded-xl">
                         <TableHeader />
                         <div className="divide-y divide-gray-50">
                           {group.items.map((p) => (

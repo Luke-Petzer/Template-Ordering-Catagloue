@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { Package } from "lucide-react";
+import { Package, Tag } from "lucide-react";
 import { useCartStore } from "@/lib/cart/store";
 import QuantityStepper from "./QuantityStepper";
 
@@ -100,10 +100,18 @@ export default function ProductRow({
           <p className="text-sm text-gray-500 truncate md:pr-8">
             {description ?? name}
           </p>
-          {/* Price — grid col 4 */}
-          <span className="text-sm font-semibold text-slate-900">
-            {ZAR.format(price)}
-          </span>
+          {/* Price — grid col 4 (wrapper keeps price + badge as one grid child) */}
+          <div className="flex flex-col gap-0.5">
+            <span className="text-sm font-semibold text-slate-900">
+              {ZAR.format(price)}
+            </span>
+            {discountType && (
+              <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-full px-2 py-0.5 w-fit">
+                <Tag className="w-2.5 h-2.5 flex-shrink-0" />
+                Bulk Discount
+              </span>
+            )}
+          </div>
         </div>
       </div>
 

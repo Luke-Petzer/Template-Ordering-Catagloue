@@ -3,8 +3,9 @@
 import { useState, useTransition } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Layers, Menu, X, Loader2 } from "lucide-react";
+import { Layers, Menu, X, Loader2, ShoppingCart } from "lucide-react";
 import { logoutAction } from "@/app/actions/auth";
+import { useCartStore } from "@/lib/cart/store";
 import type { Route } from "next";
 
 const NAV_LINKS: { href: Route; label: string }[] = [
@@ -17,6 +18,11 @@ export default function NavBar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isLoggingOut, startLogout] = useTransition();
 
+  // Live cart count for mobile badge — sum of all item quantities
+  const cartCount = useCartStore((s) =>
+    s.items.reduce((n, item) => n + item.quantity, 0)
+  );
+
   const handleLogout = () => {
     startLogout(async () => {
       await logoutAction();
@@ -25,12 +31,14 @@ export default function NavBar() {
 
   return (
     <>
-      {/* Full-screen loading overlay while logout is in flight */}
+      {/* Full-screen overlay while logout is in flight */}
       {isLoggingOut && (
         <div className="fixed inset-0 z-[100] bg-white/80 backdrop-blur-sm flex items-center justify-center">
           <div className="flex flex-col items-center gap-3">
             <Loader2 className="w-8 h-8 text-slate-900 animate-spin" />
-            <p className="text-sm font-medium text-slate-600">Signing out…</p>
+            <p className="text-sm font-medium text-slate-600">
+              Logging out safely...
+            </p>
           </div>
         </div>
       )}
@@ -69,32 +77,49 @@ export default function NavBar() {
           </div>
         </div>
 
-        {/* Desktop logout — hidden on mobile */}
-        <button
-          type="button"
-          onClick={handleLogout}
-          disabled={isLoggingOut}
-          className="hidden md:flex items-center gap-1.5 text-xs font-semibold px-4 py-2 border border-gray-200 rounded text-gray-600 hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:pointer-events-none"
-        >
-          {isLoggingOut ? (
-            <Loader2 className="w-3.5 h-3.5 animate-spin" />
-          ) : null}
-          Logout
-        </button>
+        {/* Right — cart icon (mobile/tablet) + logout (desktop) + hamburger (mobile) */}
+        <div className="flex items-center gap-3">
+          {/* Cart icon — visible below lg where CartSidebar is hidden */}
+          <Link
+            href={"/cart" as Route}
+            className="lg:hidden relative p-2 -mr-1 text-slate-700 hover:text-slate-900 transition-colors"
+            aria-label={`Cart (${cartCount} items)`}
+          >
+            <ShoppingCart className="w-5 h-5" />
+            {cartCount > 0 && (
+              <span className="absolute top-0.5 right-0.5 min-w-[16px] h-4 bg-slate-900 text-white text-[10px] font-bold rounded-full flex items-center justify-center px-1 leading-none">
+                {cartCount > 99 ? "99+" : cartCount}
+              </span>
+            )}
+          </Link>
 
-        {/* Mobile hamburger toggle — hidden on desktop */}
-        <button
-          type="button"
-          className="md:hidden p-2 -mr-2 text-slate-900"
-          onClick={() => setIsMobileMenuOpen((prev) => !prev)}
-          aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
-        >
-          {isMobileMenuOpen ? (
-            <X className="w-6 h-6" />
-          ) : (
-            <Menu className="w-6 h-6" />
-          )}
-        </button>
+          {/* Desktop logout — hidden on mobile */}
+          <button
+            type="button"
+            onClick={handleLogout}
+            disabled={isLoggingOut}
+            className="hidden md:flex items-center gap-1.5 text-xs font-semibold px-4 py-2 border border-gray-200 rounded text-gray-600 hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:pointer-events-none"
+          >
+            {isLoggingOut ? (
+              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+            ) : null}
+            Logout
+          </button>
+
+          {/* Mobile hamburger toggle — hidden on desktop */}
+          <button
+            type="button"
+            className="md:hidden p-2 -mr-2 text-slate-900"
+            onClick={() => setIsMobileMenuOpen((prev) => !prev)}
+            aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
+          >
+            {isMobileMenuOpen ? (
+              <X className="w-6 h-6" />
+            ) : (
+              <Menu className="w-6 h-6" />
+            )}
+          </button>
+        </div>
       </nav>
 
       {/* Mobile dropdown menu */}

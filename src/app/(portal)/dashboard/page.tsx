@@ -69,9 +69,9 @@ export default async function DashboardPage() {
   }));
 
   return (
-    <div className="h-screen overflow-hidden flex flex-col bg-white">
+    <>
       <NavBar />
       <CatalogueShell products={rows} categories={categories} />
-    </div>
+    </>
   );
 }

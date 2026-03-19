@@ -16,7 +16,7 @@ export default function CartSidebar() {
   const sub = subtotal();
 
   return (
-    <aside className="w-full md:w-[400px] border-t md:border-t-0 md:border-l border-gray-100 bg-white flex flex-col flex-shrink-0 z-40">
+    <aside className="hidden lg:flex w-[400px] border-l border-gray-100 bg-white flex-col flex-shrink-0 z-40">
       {/* Header */}
       <div className="p-6 flex-shrink-0 border-b border-gray-100">
         <h2 className="text-sm font-semibold text-slate-900 tracking-tight flex items-center gap-2">

@@ -4,7 +4,7 @@ interface GlobalBannerProps {
 
 export default function GlobalBanner({ message }: GlobalBannerProps) {
   return (
-    <div className="w-full bg-amber-500 text-white" role="status" aria-label="Site notification">
+    <div className="flex-shrink-0 w-full bg-amber-500 text-white" role="status" aria-label="Site notification">
       <div className="max-w-[1440px] mx-auto px-4 sm:px-8 py-2.5 flex items-center justify-center gap-2">
         <svg
           aria-hidden="true"

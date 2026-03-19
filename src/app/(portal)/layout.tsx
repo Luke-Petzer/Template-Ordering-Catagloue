@@ -25,9 +25,13 @@ export default async function PortalLayout({
     settings.banner_message.trim().length > 0;
 
   return (
-    <>
+    <div className="h-screen overflow-hidden flex flex-col bg-white">
+      {/* Banner is flex-shrink-0 so it never compresses the content area */}
       {showBanner && <GlobalBanner message={settings!.banner_message!} />}
-      {children}
-    </>
+      {/* Content area fills remaining viewport height exactly */}
+      <div className="flex-1 overflow-hidden flex flex-col">
+        {children}
+      </div>
+    </div>
   );
 }
