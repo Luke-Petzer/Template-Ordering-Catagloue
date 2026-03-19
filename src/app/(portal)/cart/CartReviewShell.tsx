@@ -64,7 +64,7 @@ export default function CartReviewShell({ reorderItems }: CartReviewShellProps) 
   };
 
   return (
-    <main className="flex-1 max-w-[1440px] w-full mx-auto px-8 mt-12 mb-12">
+    <main className="flex-1 max-w-[1440px] w-full mx-auto px-8 mt-12 pb-24">
       <div className="mb-8">
         <h1 className="text-2xl font-semibold text-slate-900">Review Order</h1>
         <p className="text-sm text-gray-500 mt-1">

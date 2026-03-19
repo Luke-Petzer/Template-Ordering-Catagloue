@@ -13,7 +13,23 @@
       "Bash(rm:*)",
       "WebFetch(domain:raw.githubusercontent.com)",
       "Bash(superdesign:*)",
-      "Bash(ls not:*)"
+      "Bash(ls not:*)",
+      "Bash(ls:*)",
+      "Bash(git add:*)",
+      "Bash(git:*)",
+      "mcp__ide__getDiagnostics",
+      "Bash(npm list:*)",
+      "Bash(/Users/lukepetzer/.nvm/versions/node/v22.13.1/bin/npx tsc:*)",
+      "Bash(node_modules/.bin/tsc --noEmit)",
+      "Read(//usr/local/lib/**)",
+      "Read(//Users/lukepetzer/.nvm/versions/**)",
+      "Read(//usr/local/bin/**)",
+      "Bash(/bin/zsh -c \"npx tsc --noEmit 2>&1\")",
+      "Bash(/bin/zsh -c \"source ~/.zshrc 2>/dev/null; which node npx; node --version\" 2>&1)",
+      "Bash(/bin/zsh -c \"source ~/.zshenv 2>/dev/null; source ~/.zprofile 2>/dev/null; source ~/.zshrc 2>/dev/null; which node npx 2>&1 || echo 'not found'\" 2>&1)",
+      "Bash(/Users/lukepetzer/.nvm/versions/node/v22.14.0/bin/npx tsc:*)",
+      "Bash(/Users/lukepetzer/Library/Caches/ms-playwright-go/1.50.1/node --version)",
+      "Bash(/Users/lukepetzer/Library/Caches/ms-playwright-go/1.50.1/node node_modules/.bin/tsc --noEmit)"
     ]
   }
 }

@@ -47,7 +47,7 @@ export default async function ConfirmedPage({ searchParams }: PageProps) {
   const bankRef = `${config?.bank_reference_prefix ?? "INV"}-${order.reference_number}`;
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#fafafa]">
+    <div className="flex-1 overflow-y-auto flex flex-col bg-[#fafafa]">
       <NavBar />
 
       {/* Main content */}

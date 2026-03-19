@@ -46,7 +46,7 @@ export default async function CartPage({ searchParams }: PageProps) {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50/30 flex flex-col">
+    <div className="flex-1 overflow-y-auto bg-slate-50/30 flex flex-col">
       <NavBar />
       <CartReviewShell reorderItems={reorderId ? reorderItems : null} />
     </div>

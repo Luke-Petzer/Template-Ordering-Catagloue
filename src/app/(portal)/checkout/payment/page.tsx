@@ -58,7 +58,7 @@ export default async function PaymentPage({ searchParams }: PageProps) {
   const items = (order.order_items as RawItem[]) ?? [];
 
   return (
-    <div className="min-h-screen bg-[#fafafa] flex flex-col">
+    <div className="flex-1 overflow-y-auto bg-[#fafafa] flex flex-col">
       <NavBar />
 
       <main className="flex-1 max-w-[1200px] w-full mx-auto px-8 pt-12 pb-24">
