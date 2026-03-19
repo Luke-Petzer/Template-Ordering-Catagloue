@@ -250,6 +250,9 @@ export async function checkoutAction(
   const initialStatus = "pending" as const;
 
   // 7. Insert order row
+  if (orderNotes.length > 1000) {
+    return { error: "Delivery instructions must be 1000 characters or fewer." };
+  }
   const trimmedNotes = orderNotes.trim() || null;
   const { data: order, error: orderError } = await adminClient
     .from("orders")

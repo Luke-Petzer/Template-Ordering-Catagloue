@@ -216,6 +216,7 @@ export default function CartReviewShell({ reorderItems }: CartReviewShellProps) 
                 value={orderNotes}
                 onChange={(e) => setOrderNotes(e.target.value)}
                 placeholder="e.g. Leave at back entrance, call before delivery…"
+                maxLength={1000}
                 className="w-full min-h-[80px] resize-none rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent transition-all"
               />
             </div>

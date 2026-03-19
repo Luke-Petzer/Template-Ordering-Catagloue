@@ -142,7 +142,7 @@ export default async function AdminCommandCenterPage({ searchParams }: PageProps
       total_amount: Number(o.total_amount),
       business_name: profile?.business_name ?? "—",
       account_number: profile?.account_number ?? null,
-      order_notes: (o as any).order_notes ?? null,
+      order_notes: (o as any).order_notes ?? null, // types will update on next supabase gen
       items: (o.order_items as RawItem[]).map((item) => ({
         sku: item.sku,
         product_name: item.product_name,
