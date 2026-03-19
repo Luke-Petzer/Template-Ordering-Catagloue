@@ -4,6 +4,21 @@ import { useState } from "react";
 import { ChevronDown, ChevronRight } from "lucide-react";
 import { reorderAction } from "@/app/actions/order";
 
+function StatusBadge({ status }: { status: string }) {
+  const map: Record<string, string> = {
+    pending: "bg-amber-50 text-amber-700 border border-amber-200",
+    confirmed: "bg-sky-50 text-sky-700 border border-sky-200",
+    processing: "bg-blue-50 text-blue-700 border border-blue-200",
+    fulfilled: "bg-emerald-50 text-emerald-700 border border-emerald-200",
+    cancelled: "bg-red-50 text-red-600 border border-red-200",
+  };
+  return (
+    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium capitalize ${map[status] ?? "bg-slate-100 text-slate-500 border border-slate-200"}`}>
+      {status}
+    </span>
+  );
+}
+
 const ZAR = new Intl.NumberFormat("en-ZA", {
   style: "currency",
   currency: "ZAR",
@@ -56,9 +71,9 @@ export default function OrderHistoryTable({ orders }: OrderHistoryTableProps) {
 
   return (
     <div className="bg-white border border-gray-100 rounded-lg overflow-hidden shadow-sm">
-      {/* Table header */}
+      {/* Table header — desktop only */}
       <div
-        className="grid items-center px-6 py-4 bg-gray-50/50 border-b border-gray-100"
+        className="hidden md:grid items-center px-6 py-4 bg-gray-50/50 border-b border-gray-100"
         style={{ gridTemplateColumns: "140px 180px 1fr 140px 120px" }}
       >
         <span className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">
@@ -82,10 +97,59 @@ export default function OrderHistoryTable({ orders }: OrderHistoryTableProps) {
         const isExpanded = expandedId === order.id;
         return (
           <div key={order.id} className="border-b border-gray-50 last:border-b-0">
-            {/* Order row */}
+            {/* Mobile card — hidden on md+ */}
+            <div
+              className="md:hidden px-4 py-4 flex flex-col gap-2 cursor-pointer"
+              onClick={() => toggle(order.id)}
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  {isExpanded ? (
+                    <ChevronDown className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                  ) : (
+                    <ChevronRight className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                  )}
+                  <span className="text-sm font-semibold text-slate-900 uppercase tracking-tight">
+                    {order.reference_number}
+                  </span>
+                </div>
+                <StatusBadge status={order.status} />
+              </div>
+              <span className="text-sm text-gray-500 pl-6">
+                {formatDate(order.created_at)}
+              </span>
+              <span className="text-sm text-gray-500 pl-6">
+                {order.item_count} Unique{" "}
+                {order.item_count === 1 ? "Item" : "Items"}
+              </span>
+              <div
+                className="flex items-center justify-between pl-6"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <span className="text-sm font-semibold text-slate-900">
+                  {ZAR.format(order.total_amount)}
+                </span>
+                <form action={reorderAction}>
+                  <input type="hidden" name="orderId" value={order.id} />
+                  <button
+                    type="submit"
+                    className={[
+                      "text-[12px] font-bold px-4 py-2 rounded transition-colors",
+                      isExpanded
+                        ? "bg-slate-900 text-white hover:bg-slate-800"
+                        : "bg-gray-100 text-gray-700 hover:bg-gray-200",
+                    ].join(" ")}
+                  >
+                    Reorder
+                  </button>
+                </form>
+              </div>
+            </div>
+
+            {/* Desktop row — hidden below md */}
             <div
               className={[
-                "grid items-center px-6 py-5 cursor-pointer transition-colors",
+                "hidden md:grid items-center px-6 py-5 cursor-pointer transition-colors",
                 isExpanded ? "bg-slate-50" : "hover:bg-gray-50",
               ].join(" ")}
               style={{ gridTemplateColumns: "140px 180px 1fr 140px 120px" }}
