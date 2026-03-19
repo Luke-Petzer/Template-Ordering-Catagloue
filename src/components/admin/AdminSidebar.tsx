@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { logoutAction } from "@/app/actions/auth";
+import AdminLogoutButton from "@/components/admin/AdminLogoutButton";
 import {
   LayoutDashboard,
   Package,
@@ -10,7 +10,6 @@ import {
   Settings,
   FileText,
   Box,
-  LogOut,
   Bell,
 } from "lucide-react";
 import type { Route } from "next";
@@ -148,15 +147,7 @@ export default function AdminSidebar({ adminName, adminEmail, isSuperAdmin }: Ad
             <p className="text-sm text-slate-200 font-medium truncate">{adminName}</p>
             <p className="text-[11px] text-slate-500 truncate">{adminEmail}</p>
           </div>
-          <form action={logoutAction}>
-            <button
-              type="submit"
-              className="text-slate-500 hover:text-slate-300 cursor-pointer transition-colors"
-              title="Sign out"
-            >
-              <LogOut className="w-4 h-4" />
-            </button>
-          </form>
+          <AdminLogoutButton variant="icon" />
         </div>
       </div>
     </aside>

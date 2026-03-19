@@ -2,9 +2,8 @@ import { getSession } from "@/lib/auth/session";
 import { redirect } from "next/navigation";
 import { adminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
-import { LogOut } from "lucide-react";
 import AdminSidebar from "@/components/admin/AdminSidebar";
-import { logoutAction } from "@/app/actions/auth";
+import AdminLogoutButton from "@/components/admin/AdminLogoutButton";
 import type { Route } from "next";
 
 export default async function AdminLayout({
@@ -47,15 +46,7 @@ export default async function AdminLayout({
             {adminName}
             <span className="ml-2 text-[11px] font-normal text-slate-400">Admin</span>
           </p>
-          <form action={logoutAction}>
-            <button
-              type="submit"
-              className="flex items-center gap-2 h-9 px-4 border border-slate-200 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors"
-            >
-              <LogOut className="w-4 h-4" />
-              Logout
-            </button>
-          </form>
+          <AdminLogoutButton variant="header" />
         </header>
 
         {/* Page content */}
