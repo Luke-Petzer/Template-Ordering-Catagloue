@@ -103,13 +103,15 @@ export default function ProductRow({
           <button
             type="button"
             onClick={() => setIsExpanded((v) => !v)}
-            className="flex items-center gap-1 text-left w-full min-w-0 md:pr-8 group/desc"
+            aria-expanded={isExpanded}
+            aria-controls={`desc-panel-${productId}`}
+            className="flex items-center gap-1 text-left w-full min-w-0 md:pr-8 cursor-pointer group/desc"
           >
             <span className="text-sm text-gray-500 truncate flex-1 min-w-0">
               {description ?? name}
             </span>
             <ChevronDown
-              className={`w-3.5 h-3.5 flex-shrink-0 text-gray-400 transition-transform duration-200 ${isExpanded ? "rotate-180" : ""}`}
+              className={`w-3.5 h-3.5 flex-shrink-0 text-gray-400 transition-transform duration-200 group-hover/desc:text-slate-600 ${isExpanded ? "rotate-180" : ""}`}
             />
           </button>
           {/* Price — grid col 4 (wrapper keeps price + badge as one grid child) */}
@@ -147,7 +149,7 @@ export default function ProductRow({
 
       {/* ── Expanded accordion panel — direct child of grid so col-span-full works ── */}
       {isExpanded && (
-        <div className="col-span-full bg-slate-50 border-t border-gray-100 px-4 py-4 md:px-6 rounded-b-lg">
+        <div id={`desc-panel-${productId}`} className="col-span-full bg-slate-50 border-t border-gray-100 px-4 py-4 md:px-6 rounded-b-lg">
           {/* Section 1 — Full Description */}
           <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider mb-1">
             Description
