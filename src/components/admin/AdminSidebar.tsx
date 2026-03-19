@@ -12,7 +12,6 @@ import {
   Box,
   LogOut,
   Bell,
-  UserCog,
 } from "lucide-react";
 import type { Route } from "next";
 
@@ -61,12 +60,6 @@ const SYSTEM_NAV: {
     href: "/admin/audit" as Route,
     label: "Audit Log",
     icon: <FileText className="w-[18px] h-[18px]" />,
-  },
-  {
-    href: "/admin/staff" as Route,
-    label: "Staff",
-    icon: <UserCog className="w-[18px] h-[18px]" />,
-    superAdminOnly: true,
   },
 ];
 
