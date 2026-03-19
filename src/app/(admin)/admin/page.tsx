@@ -105,7 +105,7 @@ export default async function AdminCommandCenterPage({ searchParams }: PageProps
     .from("orders")
     .select(
       `id, reference_number, created_at, status, payment_method,
-       subtotal, vat_amount, total_amount,
+       subtotal, vat_amount, total_amount, order_notes,
        profiles ( business_name, account_number ),
        order_items ( sku, product_name, quantity, unit_price, line_total )`,
       { count: "exact" }
@@ -142,6 +142,7 @@ export default async function AdminCommandCenterPage({ searchParams }: PageProps
       total_amount: Number(o.total_amount),
       business_name: profile?.business_name ?? "—",
       account_number: profile?.account_number ?? null,
+      order_notes: (o as any).order_notes ?? null,
       items: (o.order_items as RawItem[]).map((item) => ({
         sku: item.sku,
         product_name: item.product_name,

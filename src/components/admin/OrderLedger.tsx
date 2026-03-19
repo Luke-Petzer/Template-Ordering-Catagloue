@@ -25,6 +25,7 @@ export interface OrderRow {
   total_amount: number;
   business_name: string;
   account_number: string | null;
+  order_notes: string | null;
   items: {
     sku: string;
     product_name: string;
@@ -196,6 +197,16 @@ function ExpandedRow({
               </tbody>
             </table>
           </div>
+
+          {/* Delivery Instructions */}
+          {order.order_notes && (
+            <div className="mt-4 bg-amber-50 border border-amber-100 rounded-lg p-3">
+              <p className="text-[11px] font-semibold text-amber-700 uppercase tracking-wider mb-1">
+                Delivery Instructions
+              </p>
+              <p className="text-sm text-slate-700">{order.order_notes}</p>
+            </div>
+          )}
 
           {/* Actions row */}
           <div className="flex items-center justify-between mt-4">

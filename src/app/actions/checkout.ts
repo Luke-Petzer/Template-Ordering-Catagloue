@@ -1,3 +1,6 @@
+// SQL Migration (run in Supabase SQL Editor):
+// ALTER TABLE orders ADD COLUMN IF NOT EXISTS order_notes TEXT;
+
 "use server";
 
 import { redirect } from "next/navigation";
@@ -159,7 +162,8 @@ async function dispatchFulfillmentEmails(
  * On success redirect() is called — function never returns to the client.
  */
 export async function checkoutAction(
-  rawItems: unknown
+  rawItems: unknown,
+  orderNotes: string = ""
 ): Promise<{ error: string } | void> {
   // 1. Authenticate
   const session = await getSession();
@@ -246,6 +250,7 @@ export async function checkoutAction(
   const initialStatus = "pending" as const;
 
   // 7. Insert order row
+  const trimmedNotes = orderNotes.trim() || null;
   const { data: order, error: orderError } = await adminClient
     .from("orders")
     .insert({
@@ -256,7 +261,9 @@ export async function checkoutAction(
       discount_amount: totalDiscountAmount,
       vat_amount: vatAmount,
       total_amount: totalAmount,
-    })
+      // order_notes column added via migration — types will regenerate on next supabase gen
+      order_notes: trimmedNotes,
+    } as any)
     .select("*")
     .single();
 

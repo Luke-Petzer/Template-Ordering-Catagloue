@@ -30,6 +30,7 @@ interface CartReviewShellProps {
 export default function CartReviewShell({ reorderItems }: CartReviewShellProps) {
   const { items, updateQuantity, removeItem, subtotal, addItem } = useCartStore();
   const [error, setError] = useState<string | null>(null);
+  const [orderNotes, setOrderNotes] = useState<string>("");
   const [isPending, startTransition] = useTransition();
 
   // Merge reorder items into cart on mount
@@ -56,7 +57,7 @@ export default function CartReviewShell({ reorderItems }: CartReviewShellProps) 
   const handleCheckout = () => {
     setError(null);
     startTransition(async () => {
-      const result = await checkoutAction(items);
+      const result = await checkoutAction(items, orderNotes);
       if (result?.error) setError(result.error);
       // On success: checkoutAction calls redirect() — component unmounts
     });
@@ -199,6 +200,24 @@ export default function CartReviewShell({ reorderItems }: CartReviewShellProps) 
                   {ZAR.format(total)}
                 </span>
               </div>
+            </div>
+
+            {/* Delivery Instructions */}
+            <div className="mb-6">
+              <label
+                htmlFor="order_notes"
+                className="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1.5"
+              >
+                Delivery Instructions (optional)
+              </label>
+              <textarea
+                id="order_notes"
+                name="order_notes"
+                value={orderNotes}
+                onChange={(e) => setOrderNotes(e.target.value)}
+                placeholder="e.g. Leave at back entrance, call before delivery…"
+                className="w-full min-h-[80px] resize-none rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent transition-all"
+              />
             </div>
 
             {/* Error message */}
