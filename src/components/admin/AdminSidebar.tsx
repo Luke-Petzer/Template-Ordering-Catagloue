@@ -12,6 +12,7 @@ import {
   Box,
   LogOut,
   Bell,
+  UserCog,
 } from "lucide-react";
 import type { Route } from "next";
 
@@ -44,16 +45,28 @@ const MAIN_NAV: { href: Route; label: string; icon: React.ReactNode }[] = [
   },
 ];
 
-const SYSTEM_NAV: { href: Route; label: string; icon: React.ReactNode }[] = [
+const SYSTEM_NAV: {
+  href: Route;
+  label: string;
+  icon: React.ReactNode;
+  superAdminOnly?: boolean;
+}[] = [
   {
     href: "/admin/settings" as Route,
     label: "Settings",
     icon: <Settings className="w-[18px] h-[18px]" />,
+    superAdminOnly: true,
   },
   {
     href: "/admin/audit" as Route,
     label: "Audit Log",
     icon: <FileText className="w-[18px] h-[18px]" />,
+  },
+  {
+    href: "/admin/staff" as Route,
+    label: "Staff",
+    icon: <UserCog className="w-[18px] h-[18px]" />,
+    superAdminOnly: true,
   },
 ];
 
@@ -115,7 +128,7 @@ export default function AdminSidebar({ adminName, adminEmail, isSuperAdmin }: Ad
         </p>
 
         {SYSTEM_NAV.filter(
-          ({ href }) => href !== "/admin/settings" || isSuperAdmin
+          ({ superAdminOnly }) => !superAdminOnly || isSuperAdmin
         ).map(({ href, label, icon }) => (
           <Link
             key={href}
