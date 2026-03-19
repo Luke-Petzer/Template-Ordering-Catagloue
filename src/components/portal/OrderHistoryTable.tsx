@@ -195,50 +195,39 @@ export default function OrderHistoryTable({ orders }: OrderHistoryTableProps) {
 
             {/* Accordion — line items */}
             {isExpanded && (
-              <div className="bg-gray-50 px-6 py-6">
-                <div className="bg-white border border-gray-100 rounded shadow-sm">
-                  <table className="w-full text-left border-collapse">
-                    <thead>
-                      <tr className="border-b border-gray-100 bg-gray-50/30">
-                        <th className="px-4 py-3 text-[11px] font-semibold text-gray-400 uppercase tracking-wider">
-                          SKU
-                        </th>
-                        <th className="px-4 py-3 text-[11px] font-semibold text-gray-400 uppercase tracking-wider">
-                          Description
-                        </th>
-                        <th className="px-4 py-3 text-[11px] font-semibold text-gray-400 uppercase tracking-wider">
-                          Unit Price
-                        </th>
-                        <th className="px-4 py-3 text-[11px] font-semibold text-gray-400 uppercase tracking-wider text-right">
-                          Qty
-                        </th>
-                        <th className="px-4 py-3 text-[11px] font-semibold text-gray-400 uppercase tracking-wider text-right">
-                          Subtotal
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-50">
-                      {order.items.map((item) => (
-                        <tr key={item.id}>
-                          <td className="px-4 py-3 text-[13px] font-medium text-slate-900">
-                            {item.sku}
-                          </td>
-                          <td className="px-4 py-3 text-[13px] text-gray-500">
-                            {item.product_name}
-                          </td>
-                          <td className="px-4 py-3 text-[13px] text-gray-500">
-                            {ZAR.format(item.unit_price)}
-                          </td>
-                          <td className="px-4 py-3 text-[13px] text-gray-900 font-medium text-right">
-                            {item.quantity}
-                          </td>
-                          <td className="px-4 py-3 text-[13px] text-slate-900 font-medium text-right">
-                            {ZAR.format(item.line_total)}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+              <div className="bg-gray-50 px-3 md:px-6 py-4 md:py-6">
+                <div className="bg-white border border-gray-100 rounded shadow-sm divide-y divide-gray-50">
+                  {/* Desktop column headers — hidden on mobile */}
+                  <div className="hidden md:grid grid-cols-[1fr_2fr_1fr_80px_100px] px-4 py-2.5 bg-gray-50/30">
+                    <span className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">SKU</span>
+                    <span className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Description</span>
+                    <span className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Unit Price</span>
+                    <span className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider text-right">Qty</span>
+                    <span className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider text-right">Subtotal</span>
+                  </div>
+
+                  {order.items.map((item) => (
+                    <div key={item.id}>
+                      {/* Mobile card */}
+                      <div className="md:hidden px-4 py-3 flex flex-col gap-1">
+                        <p className="text-sm font-semibold text-slate-900">{item.product_name}</p>
+                        <p className="text-xs text-gray-400">{item.sku}</p>
+                        <div className="flex justify-between items-center mt-1">
+                          <span className="text-xs text-gray-500">Qty: {item.quantity}</span>
+                          <span className="text-sm font-semibold text-slate-900">{ZAR.format(item.line_total)}</span>
+                        </div>
+                      </div>
+
+                      {/* Desktop row */}
+                      <div className="hidden md:grid grid-cols-[1fr_2fr_1fr_80px_100px] items-center px-4 py-3">
+                        <span className="text-[13px] font-medium text-slate-900">{item.sku}</span>
+                        <span className="text-[13px] text-gray-500">{item.product_name}</span>
+                        <span className="text-[13px] text-gray-500">{ZAR.format(item.unit_price)}</span>
+                        <span className="text-[13px] text-gray-900 font-medium text-right">{item.quantity}</span>
+                        <span className="text-[13px] text-slate-900 font-medium text-right">{ZAR.format(item.line_total)}</span>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
             )}
