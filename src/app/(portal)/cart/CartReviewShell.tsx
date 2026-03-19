@@ -98,75 +98,88 @@ export default function CartReviewShell({ reorderItems }: CartReviewShellProps) 
               </div>
 
               {/* Items */}
-              {items.map((item) => (
-                <div key={item.productId} className="border-b border-gray-100 last:border-b-0">
-                  {/* Mobile card — block on mobile, hidden on md+ */}
-                  <div className="md:hidden p-4 flex flex-col gap-3">
-                    {/* Name + SKU */}
-                    <div>
-                      <p className="text-sm font-semibold text-slate-900">{item.name}</p>
-                      <p className="text-xs text-gray-400 mt-0.5">{item.sku}</p>
-                    </div>
-                    {/* Unit price */}
-                    <div className="flex justify-between items-center">
-                      <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Unit Price</span>
-                      <span className="text-sm text-slate-700">{ZAR.format(getEffectiveUnitPrice(item))}</span>
-                    </div>
-                    {/* Quantity */}
-                    <div className="flex justify-between items-center">
-                      <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Quantity</span>
-                      <QuantityStepper value={item.quantity} onChange={(q) => updateQuantity(item.productId, q)} />
-                    </div>
-                    {/* Line total */}
-                    <div className="flex justify-between items-center">
-                      <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Line Total</span>
-                      <div className="text-right">
-                        <span className="text-sm font-semibold text-slate-900">{ZAR.format(parseFloat((getEffectiveUnitPrice(item) * item.quantity).toFixed(2)))}</span>
-                        {getEffectiveUnitPrice(item) < item.unitPrice && (
-                          <p className="text-xs text-emerald-600 font-medium">Bulk discount applied</p>
-                        )}
+              {items.map((item) => {
+                const effectivePrice = getEffectiveUnitPrice(item);
+                const lineTotal = parseFloat((effectivePrice * item.quantity).toFixed(2));
+                const hasBulkDiscount = effectivePrice < item.unitPrice;
+                // Single stepper declaration per item — only one layout is visible at any breakpoint via md:hidden/hidden md:grid
+                const stepper = (
+                  <QuantityStepper
+                    value={item.quantity}
+                    onChange={(q) => updateQuantity(item.productId, q)}
+                  />
+                );
+
+                return (
+                  <div key={item.productId} className="border-b border-gray-100 last:border-b-0">
+                    {/* Mobile card — block on mobile, hidden on md+ */}
+                    <div className="md:hidden p-4 flex flex-col gap-3">
+                      {/* Name + SKU */}
+                      <div>
+                        <p className="text-sm font-semibold text-slate-900">{item.name}</p>
+                        <p className="text-xs text-gray-400 mt-0.5">{item.sku}</p>
+                      </div>
+                      {/* Unit price */}
+                      <div className="flex justify-between items-center">
+                        <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Unit Price</span>
+                        <span className="text-sm text-slate-700">{ZAR.format(effectivePrice)}</span>
+                      </div>
+                      {/* Quantity */}
+                      <div className="flex justify-between items-center">
+                        <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Quantity</span>
+                        {stepper}
+                      </div>
+                      {/* Line total */}
+                      <div className="flex justify-between items-center">
+                        <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Line Total</span>
+                        <div className="text-right">
+                          <span className="text-sm font-semibold text-slate-900">{ZAR.format(lineTotal)}</span>
+                          {hasBulkDiscount && (
+                            <p className="text-xs text-emerald-600 font-medium">Bulk discount applied</p>
+                          )}
+                        </div>
+                      </div>
+                      {/* Remove */}
+                      <div className="flex justify-end">
+                        <button
+                          type="button"
+                          onClick={() => removeItem(item.productId)}
+                          className="text-gray-300 hover:text-red-500 transition-colors"
+                          aria-label={`Remove ${item.name}`}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
                       </div>
                     </div>
-                    {/* Remove */}
-                    <div className="flex justify-end">
-                      <button
-                        type="button"
-                        onClick={() => removeItem(item.productId)}
-                        className="text-gray-300 hover:text-red-500 transition-colors"
-                        aria-label={`Remove ${item.name}`}
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </div>
 
-                  {/* Desktop row — hidden on mobile, grid on md+ */}
-                  <div className="hidden md:grid md:grid-cols-[1fr_2fr_1fr_1fr_1fr_48px] items-center px-6 py-5">
-                    <span className="text-sm font-medium text-slate-900">{item.sku}</span>
-                    <span className="text-sm text-gray-500">{item.name}</span>
-                    <span className="text-sm text-slate-700">{ZAR.format(getEffectiveUnitPrice(item))}</span>
-                    <div>
-                      <QuantityStepper value={item.quantity} onChange={(q) => updateQuantity(item.productId, q)} />
-                    </div>
-                    <div>
-                      <span className="text-sm font-medium text-slate-900">{ZAR.format(parseFloat((getEffectiveUnitPrice(item) * item.quantity).toFixed(2)))}</span>
-                      {getEffectiveUnitPrice(item) < item.unitPrice && (
-                        <p className="text-xs text-emerald-600 font-medium mt-0.5">Bulk discount applied</p>
-                      )}
-                    </div>
-                    <div className="flex justify-end">
-                      <button
-                        type="button"
-                        onClick={() => removeItem(item.productId)}
-                        className="text-gray-300 hover:text-red-500 transition-colors"
-                        aria-label={`Remove ${item.name}`}
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
+                    {/* Desktop row — hidden on mobile, grid on md+ */}
+                    <div className="hidden md:grid md:grid-cols-[1fr_2fr_1fr_1fr_1fr_48px] items-center px-6 py-5">
+                      <span className="text-sm font-medium text-slate-900">{item.sku}</span>
+                      <span className="text-sm text-gray-500">{item.name}</span>
+                      <span className="text-sm text-slate-700">{ZAR.format(effectivePrice)}</span>
+                      <div>
+                        {stepper}
+                      </div>
+                      <div>
+                        <span className="text-sm font-medium text-slate-900">{ZAR.format(lineTotal)}</span>
+                        {hasBulkDiscount && (
+                          <p className="text-xs text-emerald-600 font-medium mt-0.5">Bulk discount applied</p>
+                        )}
+                      </div>
+                      <div className="flex justify-end">
+                        <button
+                          type="button"
+                          onClick={() => removeItem(item.productId)}
+                          className="text-gray-300 hover:text-red-500 transition-colors"
+                          aria-label={`Remove ${item.name}`}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>
