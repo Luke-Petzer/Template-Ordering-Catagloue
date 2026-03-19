@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { Package, Tag } from "lucide-react";
+import { Package, Tag, ChevronDown } from "lucide-react";
 import { useCartStore } from "@/lib/cart/store";
 import QuantityStepper from "./QuantityStepper";
 
@@ -17,6 +17,7 @@ interface ProductRowProps {
   sku: string;
   name: string;
   description: string | null;
+  details: string | null;
   price: number;
   primaryImageUrl: string | null;
   // Discount metadata
@@ -30,6 +31,7 @@ export default function ProductRow({
   sku,
   name,
   description,
+  details,
   price,
   primaryImageUrl,
   discountType,
@@ -37,6 +39,7 @@ export default function ProductRow({
   discountValue,
 }: ProductRowProps) {
   const [qty, setQty] = useState(1);
+  const [isExpanded, setIsExpanded] = useState(false);
   const addItem = useCartStore((s) => s.addItem);
 
   const handleAdd = () => {
@@ -97,9 +100,18 @@ export default function ProductRow({
           {/* SKU — grid col 2 */}
           <span className="text-sm font-medium text-slate-900">{sku}</span>
           {/* Description — grid col 3 */}
-          <p className="text-sm text-gray-500 truncate md:pr-8">
-            {description ?? name}
-          </p>
+          <button
+            type="button"
+            onClick={() => setIsExpanded((v) => !v)}
+            className="flex items-center gap-1 text-left w-full min-w-0 md:pr-8 group/desc"
+          >
+            <span className="text-sm text-gray-500 truncate flex-1 min-w-0">
+              {description ?? name}
+            </span>
+            <ChevronDown
+              className={`w-3.5 h-3.5 flex-shrink-0 text-gray-400 transition-transform duration-200 ${isExpanded ? "rotate-180" : ""}`}
+            />
+          </button>
           {/* Price — grid col 4 (wrapper keeps price + badge as one grid child) */}
           <div className="flex flex-col gap-0.5">
             <span className="text-sm font-semibold text-slate-900">
@@ -132,6 +144,31 @@ export default function ProductRow({
           </button>
         </div>
       </div>
+
+      {/* ── Expanded accordion panel — direct child of grid so col-span-full works ── */}
+      {isExpanded && (
+        <div className="col-span-full bg-slate-50 border-t border-gray-100 px-4 py-4 md:px-6 rounded-b-lg">
+          {/* Section 1 — Full Description */}
+          <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider mb-1">
+            Description
+          </p>
+          <p className="text-sm text-slate-700 leading-relaxed">
+            {description ?? name}
+          </p>
+
+          {/* Section 2 — Specifications (only if details present) */}
+          {details && (
+            <div className="mt-4">
+              <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider mb-1">
+                Specifications
+              </p>
+              <p className="text-sm text-slate-600 leading-relaxed whitespace-pre-wrap">
+                {details}
+              </p>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

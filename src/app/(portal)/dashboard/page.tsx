@@ -12,7 +12,7 @@ export default async function DashboardPage() {
     adminClient
       .from("products")
       .select(
-        `id, sku, name, description, price,
+        `id, sku, name, description, details, price,
          discount_type, discount_threshold, discount_value,
          category_id,
          categories ( id, name, slug, display_order ),
@@ -51,6 +51,7 @@ export default async function DashboardPage() {
       sku: p.sku,
       name: p.name,
       description: p.description as string | null,
+      details: p.details as string | null,
       price: Number(p.price),
       primaryImageUrl: sorted[0]?.url ?? null,
       discountType: (p.discount_type as "percentage" | "fixed" | null) ?? null,

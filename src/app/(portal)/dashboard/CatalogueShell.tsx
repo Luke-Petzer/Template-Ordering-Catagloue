@@ -10,6 +10,7 @@ interface ProductRowData {
   sku: string;
   name: string;
   description: string | null;
+  details: string | null;
   price: number;
   primaryImageUrl: string | null;
   // Discount fields
