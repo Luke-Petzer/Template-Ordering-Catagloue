@@ -61,7 +61,7 @@ export default async function PaymentPage({ searchParams }: PageProps) {
     <div className="flex-1 overflow-y-auto bg-[#fafafa] flex flex-col">
       <NavBar />
 
-      <main className="flex-1 max-w-[1200px] w-full mx-auto px-8 pt-12 pb-24">
+      <main className="flex-1 max-w-[1200px] w-full mx-auto px-4 md:px-8 pt-12 pb-24">
         <div className="mb-8">
           <h1 className="text-2xl font-semibold text-slate-900">
             Complete Payment
@@ -71,9 +71,9 @@ export default async function PaymentPage({ searchParams }: PageProps) {
           </p>
         </div>
 
-        <div className="grid grid-cols-12 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-8">
           {/* Left — order summary */}
-          <div className="col-span-7">
+          <div className="md:col-span-7">
             <div className="bg-white border border-gray-100 rounded-lg overflow-hidden shadow-sm mb-6">
               <div className="px-6 py-4 bg-gray-50/50 border-b border-gray-100 flex items-center justify-between">
                 <span className="text-sm font-semibold text-slate-900">
@@ -145,7 +145,7 @@ export default async function PaymentPage({ searchParams }: PageProps) {
           </div>
 
           {/* Right — bank details + CTA */}
-          <div className="col-span-5">
+          <div className="md:col-span-5">
             <div className="bg-white border border-gray-100 rounded-lg p-6 shadow-sm mb-4">
               <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider mb-4">
                 EFT Bank Details
