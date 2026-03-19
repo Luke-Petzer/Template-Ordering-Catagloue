@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Layers, Menu, X } from "lucide-react";
+import { Layers, Menu, X, Loader2 } from "lucide-react";
 import { logoutAction } from "@/app/actions/auth";
 import type { Route } from "next";
 
@@ -15,9 +15,26 @@ const NAV_LINKS: { href: Route; label: string }[] = [
 export default function NavBar() {
   const pathname = usePathname();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isLoggingOut, startLogout] = useTransition();
+
+  const handleLogout = () => {
+    startLogout(async () => {
+      await logoutAction();
+    });
+  };
 
   return (
     <>
+      {/* Full-screen loading overlay while logout is in flight */}
+      {isLoggingOut && (
+        <div className="fixed inset-0 z-[100] bg-white/80 backdrop-blur-sm flex items-center justify-center">
+          <div className="flex flex-col items-center gap-3">
+            <Loader2 className="w-8 h-8 text-slate-900 animate-spin" />
+            <p className="text-sm font-medium text-slate-600">Signing out…</p>
+          </div>
+        </div>
+      )}
+
       <nav className="h-[64px] border-b border-gray-100 bg-white flex items-center justify-between px-8 flex-shrink-0 z-50 relative">
         {/* Left — brand + nav links */}
         <div className="flex items-center gap-8">
@@ -53,14 +70,17 @@ export default function NavBar() {
         </div>
 
         {/* Desktop logout — hidden on mobile */}
-        <form action={logoutAction} className="hidden md:block">
-          <button
-            type="submit"
-            className="text-xs font-semibold px-4 py-2 border border-gray-200 rounded text-gray-600 hover:bg-gray-50 transition-colors"
-          >
-            Logout
-          </button>
-        </form>
+        <button
+          type="button"
+          onClick={handleLogout}
+          disabled={isLoggingOut}
+          className="hidden md:flex items-center gap-1.5 text-xs font-semibold px-4 py-2 border border-gray-200 rounded text-gray-600 hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:pointer-events-none"
+        >
+          {isLoggingOut ? (
+            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+          ) : null}
+          Logout
+        </button>
 
         {/* Mobile hamburger toggle — hidden on desktop */}
         <button
@@ -97,18 +117,22 @@ export default function NavBar() {
                 </Link>
               );
             })}
-            <form action={logoutAction} className="pt-2 border-t border-gray-100">
+            <div className="pt-2 border-t border-gray-100">
               <button
-                type="submit"
-                className="text-xs font-semibold px-4 py-2 border border-gray-200 rounded text-gray-600 hover:bg-gray-50 transition-colors w-full"
+                type="button"
+                onClick={handleLogout}
+                disabled={isLoggingOut}
+                className="flex items-center gap-1.5 text-xs font-semibold px-4 py-2 border border-gray-200 rounded text-gray-600 hover:bg-gray-50 transition-colors w-full disabled:opacity-50 disabled:pointer-events-none"
               >
+                {isLoggingOut ? (
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                ) : null}
                 Logout
               </button>
-            </form>
+            </div>
           </div>
         </div>
       )}
     </>
   );
 }
-

@@ -54,66 +54,75 @@ export default function ProductRow({
   };
 
   return (
+    /*
+     * Layout strategy: `md:contents` on wrapper divs lets their children
+     * participate directly in the parent 6-column grid on desktop, while on
+     * mobile the wrappers act as normal flex rows that stack vertically.
+     */
     <div
-      className="product-row grid items-center px-4 py-3"
-      style={{
-        gridTemplateColumns: "60px 140px 1fr 120px 140px 100px",
-      }}
+      className="product-row flex flex-col gap-3 p-4 md:grid md:items-center md:px-4 md:py-3 md:gap-0"
+      style={{ gridTemplateColumns: "60px 140px 1fr 120px 140px 100px" }}
     >
-      {/* Thumbnail */}
-      <div className="relative group w-fit flex-shrink-0">
-        <div className="w-[44px] h-[44px] bg-gray-50 border border-gray-100 rounded flex items-center justify-center overflow-hidden">
-          {primaryImageUrl ? (
-            <Image
-              src={primaryImageUrl}
-              alt={name}
-              width={44}
-              height={44}
-              className="object-cover w-full h-full"
-            />
-          ) : (
-            <Package className="w-5 h-5 text-gray-300" />
+      {/* ── Row 1 on mobile: thumbnail + name/sku/price ── */}
+      <div className="flex items-center gap-3 md:contents">
+        {/* Thumbnail — grid col 1 */}
+        <div className="relative group flex-shrink-0 w-fit">
+          <div className="w-[44px] h-[44px] bg-gray-50 border border-gray-100 rounded flex items-center justify-center overflow-hidden">
+            {primaryImageUrl ? (
+              <Image
+                src={primaryImageUrl}
+                alt={name}
+                width={44}
+                height={44}
+                className="object-cover w-full h-full"
+              />
+            ) : (
+              <Package className="w-5 h-5 text-gray-300" />
+            )}
+          </div>
+          {primaryImageUrl && (
+            <div className="absolute bottom-full left-0 mb-2 z-50 w-48 h-48 rounded-lg overflow-hidden shadow-xl border border-slate-200 opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-200">
+              <Image
+                src={primaryImageUrl}
+                alt={name}
+                fill
+                className="object-cover"
+              />
+            </div>
           )}
         </div>
-        {primaryImageUrl && (
-          <div className="absolute bottom-full left-0 mb-2 z-50 w-48 h-48 rounded-lg overflow-hidden shadow-xl border border-slate-200 opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-200">
-            <Image
-              src={primaryImageUrl}
-              alt={name}
-              fill
-              className="object-cover"
-            />
-          </div>
-        )}
+
+        {/* Info block — becomes `contents` on desktop so children occupy cols 2–4 */}
+        <div className="flex flex-col gap-0.5 flex-1 min-w-0 md:contents">
+          {/* SKU — grid col 2 */}
+          <span className="text-sm font-medium text-slate-900">{sku}</span>
+          {/* Description — grid col 3 */}
+          <p className="text-sm text-gray-500 truncate md:pr-8">
+            {description ?? name}
+          </p>
+          {/* Price — grid col 4 */}
+          <span className="text-sm font-semibold text-slate-900">
+            {ZAR.format(price)}
+          </span>
+        </div>
       </div>
 
-      {/* SKU */}
-      <span className="text-sm font-medium text-slate-900">{sku}</span>
-
-      {/* Description */}
-      <p className="text-sm text-gray-500 truncate pr-8">
-        {description ?? name}
-      </p>
-
-      {/* Price */}
-      <span className="text-sm font-medium text-slate-900">
-        {ZAR.format(price)}
-      </span>
-
-      {/* Quantity stepper */}
-      <div className="flex items-center">
-        <QuantityStepper value={qty} onChange={setQty} />
-      </div>
-
-      {/* Add button */}
-      <div className="flex justify-end">
-        <button
-          type="button"
-          onClick={handleAdd}
-          className="text-xs font-semibold px-4 py-2 bg-slate-900 text-white rounded hover:bg-slate-800 active:scale-[0.98] transition-all"
-        >
-          Add
-        </button>
+      {/* ── Row 2 on mobile: quantity + add button ── */}
+      <div className="flex items-center justify-between gap-3 md:contents">
+        {/* Quantity — grid col 5 */}
+        <div className="flex items-center">
+          <QuantityStepper value={qty} onChange={setQty} />
+        </div>
+        {/* Add — grid col 6 */}
+        <div className="flex md:justify-end">
+          <button
+            type="button"
+            onClick={handleAdd}
+            className="text-xs font-semibold px-4 py-2 bg-slate-900 text-white rounded hover:bg-slate-800 active:scale-[0.98] transition-all"
+          >
+            Add
+          </button>
+        </div>
       </div>
     </div>
   );
