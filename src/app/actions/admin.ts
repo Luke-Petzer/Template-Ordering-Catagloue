@@ -20,6 +20,60 @@ async function requireAdmin() {
   return session;
 }
 
+/**
+ * Resolves a category ID for use on a product.
+ *
+ * - If `categoryIdRaw` is "none" or empty → returns null (no category)
+ * - If `categoryIdRaw` is "create_new" and `newCategoryName` is provided →
+ *   inserts a new category row, returns the new UUID
+ * - Otherwise treats `categoryIdRaw` as an existing category UUID
+ *
+ * Returns `{ id: string | null }` on success, `{ error: string }` on failure.
+ */
+async function resolveOrCreateCategoryId(
+  categoryIdRaw: string | null | undefined,
+  newCategoryName: string | null | undefined
+): Promise<{ id: string | null } | { error: string }> {
+  if (!categoryIdRaw || categoryIdRaw === "none") return { id: null };
+
+  if (categoryIdRaw === "create_new") {
+    const trimmedName = newCategoryName?.trim();
+    if (!trimmedName) return { error: "A name is required when creating a new category." };
+
+    // Generate a URL-safe slug: lowercase, collapse non-alphanumeric runs to hyphens, trim hyphens
+    const slug = trimmedName
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-|-$/g, "");
+
+    // Get current max display_order to append new category at the end
+    const { data: maxRow } = await adminClient
+      .from("categories")
+      .select("display_order")
+      .order("display_order", { ascending: false })
+      .limit(1)
+      .single();
+    const nextOrder = ((maxRow?.display_order as number | null) ?? 0) + 1;
+
+    const { data, error } = await adminClient
+      .from("categories")
+      .insert({ name: trimmedName, slug, display_order: nextOrder, is_active: true })
+      .select("id")
+      .single();
+
+    if (error) {
+      console.error("[admin] createCategory:", error.message);
+      if (error.code === "23505") return { error: `A category with the name "${trimmedName}" or its slug already exists.` };
+      return { error: "Failed to create category. Please try again." };
+    }
+
+    return { id: data.id };
+  }
+
+  // Existing category UUID
+  return { id: categoryIdRaw };
+}
+
 // ---------------------------------------------------------------------------
 // markProcessedAction
 // ---------------------------------------------------------------------------
@@ -267,7 +321,7 @@ export async function createProductAction(
   const details = (formData.get("details") as string | null)?.trim() ?? null;
   const priceRaw = parseFloat(formData.get("price") as string);
   const categoryIdRaw = (formData.get("category_id") as string | null)?.trim();
-  const categoryId = (!categoryIdRaw || categoryIdRaw === "none") ? null : categoryIdRaw;
+  const newCategoryName = (formData.get("new_category_name") as string | null)?.trim() || null;
   const trackStock = formData.get("track_stock") === "true";
   const stockQty = parseInt(formData.get("stock_qty") as string, 10) || 0;
   const imageUrl = (formData.get("image_url") as string | null)?.trim() || null;
@@ -293,6 +347,10 @@ export async function createProductAction(
   if (!sku || !name || isNaN(priceRaw) || priceRaw < 0) {
     return { error: "SKU, name, and a valid price are required." };
   }
+
+  const categoryResult = await resolveOrCreateCategoryId(categoryIdRaw, newCategoryName);
+  if ("error" in categoryResult) return categoryResult;
+  const categoryId = categoryResult.id;
 
   const { data, error } = await adminClient
     .from("products")
@@ -352,7 +410,7 @@ export async function updateProductAction(
   const details = (formData.get("details") as string | null)?.trim() ?? null;
   const priceRaw = parseFloat(formData.get("price") as string);
   const categoryIdRaw = (formData.get("category_id") as string | null)?.trim();
-  const categoryId = (!categoryIdRaw || categoryIdRaw === "none") ? null : categoryIdRaw;
+  const newCategoryName = (formData.get("new_category_name") as string | null)?.trim() || null;
   const trackStock = formData.get("track_stock") === "true";
   const stockQty = parseInt(formData.get("stock_qty") as string, 10) || 0;
   const isActive = formData.get("is_active") !== "false";
@@ -379,6 +437,10 @@ export async function updateProductAction(
   if (!sku || !name || isNaN(priceRaw) || priceRaw < 0) {
     return { error: "SKU, name, and a valid price are required." };
   }
+
+  const categoryResult = await resolveOrCreateCategoryId(categoryIdRaw, newCategoryName);
+  if ("error" in categoryResult) return categoryResult;
+  const categoryId = categoryResult.id;
 
   // Fetch current state so we can detect price / details changes for the audit log
   const { data: oldProduct } = await adminClient

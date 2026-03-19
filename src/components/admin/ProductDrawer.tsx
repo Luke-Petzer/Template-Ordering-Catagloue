@@ -95,6 +95,10 @@ export default function ProductDrawer({
   const [discountType, setDiscountType] = useState<string>(
     product?.discount_type ?? "none"
   );
+  const [categoryId, setCategoryId] = useState<string>(
+    product?.category_id ?? "none"
+  );
+  const isCreatingCategory = categoryId === "create_new";
   const [isDragging, setIsDragging] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(
     product?.primaryImageUrl ?? null
@@ -110,6 +114,8 @@ export default function ProductDrawer({
         setError(null);
         setPreviewUrl(product?.primaryImageUrl ?? null);
         setUploadedImageUrl(null);
+        setCategoryId(product?.category_id ?? "none");
+        setDiscountType(product?.discount_type ?? "none");
         onClose();
       }
     },
@@ -300,7 +306,8 @@ export default function ProductDrawer({
               <FieldLabel>Category</FieldLabel>
               <Select
                 name="category_id"
-                defaultValue={product?.category_id ?? "none"}
+                value={categoryId}
+                onValueChange={setCategoryId}
               >
                 <SelectTrigger className="h-10 text-sm border-slate-200 focus:ring-slate-900/10 focus:border-slate-900">
                   <SelectValue placeholder="Select category…" />
@@ -312,8 +319,23 @@ export default function ProductDrawer({
                       {c.name}
                     </SelectItem>
                   ))}
+                  <SelectItem value="create_new">
+                    ＋ Create new category…
+                  </SelectItem>
                 </SelectContent>
               </Select>
+
+              {/* Inline new-category name input */}
+              {isCreatingCategory && (
+                <input
+                  type="text"
+                  name="new_category_name"
+                  required
+                  autoFocus
+                  placeholder="New category name"
+                  className="w-full h-10 px-3 bg-white border border-slate-900 rounded-lg text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900/20 transition-all"
+                />
+              )}
             </div>
 
             {/* Description */}
