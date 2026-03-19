@@ -86,60 +86,49 @@ export default function CartReviewShell({ reorderItems }: CartReviewShellProps) 
               </Link>
             </div>
           ) : (
-            <table className="w-full text-left border-collapse block md:table">
-              <thead className="bg-slate-50 border-b border-gray-100 hidden md:table-header-group">
-                <tr>
-                  <th className="px-6 py-4 text-[11px] font-semibold text-gray-400 uppercase tracking-wider">
-                    Product SKU
-                  </th>
-                  <th className="px-6 py-4 text-[11px] font-semibold text-gray-400 uppercase tracking-wider">
-                    Description
-                  </th>
-                  <th className="px-6 py-4 text-[11px] font-semibold text-gray-400 uppercase tracking-wider">
-                    Quantity
-                  </th>
-                  <th className="px-6 py-4 text-[11px] font-semibold text-gray-400 uppercase tracking-wider text-right">
-                    Line Total
-                  </th>
-                  <th className="px-6 py-4" />
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100 block md:table-row-group">
-                {items.map((item) => (
-                  <tr key={item.productId} className="block md:table-row border-b border-gray-100 md:border-none p-4 md:p-0">
-                    <td className="flex justify-between items-center md:table-cell px-6 py-2 md:py-5 text-sm font-medium text-slate-900 align-middle">
-                      <span className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider md:hidden">Product SKU</span>
-                      {item.sku}
-                    </td>
-                    <td className="flex justify-between items-center md:table-cell px-6 py-2 md:py-5 text-sm text-gray-500 align-middle">
-                      <span className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider md:hidden">Description</span>
-                      {item.name}
-                    </td>
-                    <td className="flex justify-between items-center md:table-cell px-6 py-2 md:py-5 align-middle">
-                      <span className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider md:hidden">Quantity</span>
-                      <QuantityStepper
-                        value={item.quantity}
-                        onChange={(q) => updateQuantity(item.productId, q)}
-                      />
-                    </td>
-                    <td className="flex justify-between items-center md:table-cell px-6 py-2 md:py-5 text-sm font-medium text-slate-900 md:text-right align-middle">
-                      <span className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider md:hidden">Line Total</span>
-                      <div className="md:text-right">
-                        <span>
-                          {ZAR.format(
-                            parseFloat(
-                              (getEffectiveUnitPrice(item) * item.quantity).toFixed(2)
-                            )
-                          )}
-                        </span>
+            <div>
+              {/* Desktop header row — hidden on mobile */}
+              <div className="hidden md:grid md:grid-cols-[1fr_2fr_1fr_1fr_1fr_48px] bg-slate-50 border-b border-gray-100 px-6 py-3">
+                <span className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Product SKU</span>
+                <span className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Description</span>
+                <span className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Unit Price</span>
+                <span className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Quantity</span>
+                <span className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Line Total</span>
+                <span />
+              </div>
+
+              {/* Items */}
+              {items.map((item) => (
+                <div key={item.productId} className="border-b border-gray-100 last:border-b-0">
+                  {/* Mobile card — block on mobile, hidden on md+ */}
+                  <div className="md:hidden p-4 flex flex-col gap-3">
+                    {/* Name + SKU */}
+                    <div>
+                      <p className="text-sm font-semibold text-slate-900">{item.name}</p>
+                      <p className="text-xs text-gray-400 mt-0.5">{item.sku}</p>
+                    </div>
+                    {/* Unit price */}
+                    <div className="flex justify-between items-center">
+                      <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Unit Price</span>
+                      <span className="text-sm text-slate-700">{ZAR.format(getEffectiveUnitPrice(item))}</span>
+                    </div>
+                    {/* Quantity */}
+                    <div className="flex justify-between items-center">
+                      <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Quantity</span>
+                      <QuantityStepper value={item.quantity} onChange={(q) => updateQuantity(item.productId, q)} />
+                    </div>
+                    {/* Line total */}
+                    <div className="flex justify-between items-center">
+                      <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Line Total</span>
+                      <div className="text-right">
+                        <span className="text-sm font-semibold text-slate-900">{ZAR.format(parseFloat((getEffectiveUnitPrice(item) * item.quantity).toFixed(2)))}</span>
                         {getEffectiveUnitPrice(item) < item.unitPrice && (
-                          <p className="text-xs text-emerald-600 font-medium mt-0.5">
-                            Bulk discount applied
-                          </p>
+                          <p className="text-xs text-emerald-600 font-medium">Bulk discount applied</p>
                         )}
                       </div>
-                    </td>
-                    <td className="flex justify-end items-center md:table-cell px-6 py-2 md:py-5 align-middle">
+                    </div>
+                    {/* Remove */}
+                    <div className="flex justify-end">
                       <button
                         type="button"
                         onClick={() => removeItem(item.productId)}
@@ -148,11 +137,37 @@ export default function CartReviewShell({ reorderItems }: CartReviewShellProps) 
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                    </div>
+                  </div>
+
+                  {/* Desktop row — hidden on mobile, grid on md+ */}
+                  <div className="hidden md:grid md:grid-cols-[1fr_2fr_1fr_1fr_1fr_48px] items-center px-6 py-5">
+                    <span className="text-sm font-medium text-slate-900">{item.sku}</span>
+                    <span className="text-sm text-gray-500">{item.name}</span>
+                    <span className="text-sm text-slate-700">{ZAR.format(getEffectiveUnitPrice(item))}</span>
+                    <div>
+                      <QuantityStepper value={item.quantity} onChange={(q) => updateQuantity(item.productId, q)} />
+                    </div>
+                    <div>
+                      <span className="text-sm font-medium text-slate-900">{ZAR.format(parseFloat((getEffectiveUnitPrice(item) * item.quantity).toFixed(2)))}</span>
+                      {getEffectiveUnitPrice(item) < item.unitPrice && (
+                        <p className="text-xs text-emerald-600 font-medium mt-0.5">Bulk discount applied</p>
+                      )}
+                    </div>
+                    <div className="flex justify-end">
+                      <button
+                        type="button"
+                        onClick={() => removeItem(item.productId)}
+                        className="text-gray-300 hover:text-red-500 transition-colors"
+                        aria-label={`Remove ${item.name}`}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
           )}
         </div>
 
