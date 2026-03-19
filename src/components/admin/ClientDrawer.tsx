@@ -101,6 +101,10 @@ export default function ClientDrawer({
   const isEdit = Boolean(client);
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
+  const [role, setRole] = useState<"buyer_default" | "buyer_30_day">(
+    client?.role ?? "buyer_default"
+  );
+  const is30Day = role === "buyer_30_day";
 
   const handleOpenChange = (open: boolean) => {
     if (!open) {
@@ -206,7 +210,10 @@ export default function ClientDrawer({
                 <FieldLabel>Billing Role</FieldLabel>
                 <Select
                   name="role"
-                  defaultValue={client?.role ?? "buyer_default"}
+                  value={role}
+                  onValueChange={(val) =>
+                    setRole(val as "buyer_default" | "buyer_30_day")
+                  }
                 >
                   <SelectTrigger className="h-10 text-sm border-slate-200 focus:ring-slate-900">
                     <SelectValue />
@@ -225,44 +232,48 @@ export default function ClientDrawer({
                 </p>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <InputField
-                  name="credit_limit"
-                  label="Credit Limit (R)"
-                  type="number"
-                  defaultValue={client?.credit_limit ?? ""}
-                  placeholder="0.00"
-                />
-                <InputField
-                  name="payment_terms_days"
-                  label="Terms (days)"
-                  type="number"
-                  defaultValue={client?.payment_terms_days ?? ""}
-                  placeholder="30"
-                />
-              </div>
+              {is30Day && (
+                <>
+                  <div className="grid grid-cols-2 gap-4">
+                    <InputField
+                      name="credit_limit"
+                      label="Credit Limit (R)"
+                      type="number"
+                      defaultValue={client?.credit_limit ?? ""}
+                      placeholder="0.00"
+                    />
+                    <InputField
+                      name="payment_terms_days"
+                      label="Terms (days)"
+                      type="number"
+                      defaultValue={client?.payment_terms_days ?? ""}
+                      placeholder="30"
+                    />
+                  </div>
 
-              <div>
-                <FieldLabel>Available Credit (R)</FieldLabel>
-                <input
-                  type="number"
-                  name="available_credit"
-                  min={0}
-                  step="0.01"
-                  defaultValue={client?.available_credit ?? ""}
-                  placeholder="e.g. 25000.00"
-                  className="w-full h-10 px-3 bg-white border border-slate-200 rounded-lg text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900 transition-all"
-                />
-                <p className="text-[11px] text-slate-400 mt-1.5">
-                  Current available balance. Adjust manually to reflect payments received or credit resets.
-                </p>
-              </div>
+                  <div>
+                    <FieldLabel>Available Credit (R)</FieldLabel>
+                    <input
+                      type="number"
+                      name="available_credit"
+                      min={0}
+                      step="0.01"
+                      defaultValue={client?.available_credit ?? ""}
+                      placeholder="e.g. 25000.00"
+                      className="w-full h-10 px-3 bg-white border border-slate-200 rounded-lg text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900 transition-all"
+                    />
+                    <p className="text-[11px] text-slate-400 mt-1.5">
+                      Current available balance. Adjust manually to reflect payments received or credit resets.
+                    </p>
+                  </div>
+                </>
+              )}
 
               <InputField
                 name="vat_number"
-                label="VAT Number"
+                label="VAT Registration Number"
                 defaultValue={client?.vat_number}
-                placeholder="VAT Reg No."
+                placeholder="e.g. 4123456789"
               />
             </div>
 

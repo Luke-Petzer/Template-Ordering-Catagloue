@@ -39,7 +39,7 @@ export default function QuantityStepper({
           const n = parseInt(e.target.value, 10);
           if (!isNaN(n) && n >= min) onChange(max !== undefined ? Math.min(n, max) : n);
         }}
-        className="w-12 text-center text-[13px] font-medium border-x border-gray-100 outline-none"
+        className="w-16 text-center text-[13px] font-medium border-x border-gray-100 outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
         aria-label="Quantity"
       />
       <button

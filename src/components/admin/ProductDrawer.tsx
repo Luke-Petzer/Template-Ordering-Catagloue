@@ -92,6 +92,9 @@ export default function ProductDrawer({
   const isEdit = Boolean(product);
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
+  const [discountType, setDiscountType] = useState<string>(
+    product?.discount_type ?? "none"
+  );
   const [isDragging, setIsDragging] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(
     product?.primaryImageUrl ?? null
@@ -175,6 +178,7 @@ export default function ProductDrawer({
           {isEdit && (
             <input type="hidden" name="id" value={product!.id} />
           )}
+          <input type="hidden" name="track_stock" value="false" />
 
           {/* Scrollable body */}
           <div className="flex-1 overflow-y-auto p-6 space-y-6">
@@ -351,7 +355,8 @@ export default function ProductDrawer({
                 <FieldLabel>Discount Type</FieldLabel>
                 <Select
                   name="discount_type"
-                  defaultValue={product?.discount_type ?? "none"}
+                  value={discountType}
+                  onValueChange={setDiscountType}
                 >
                   <SelectTrigger className="h-10 text-sm border-slate-200 focus:ring-slate-900/10 focus:border-slate-900">
                     <SelectValue placeholder="No discount" />
@@ -364,77 +369,36 @@ export default function ProductDrawer({
                 </Select>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1.5">
-                  <FieldLabel>Min. Quantity</FieldLabel>
-                  <input
-                    type="number"
-                    name="discount_threshold"
-                    min={1}
-                    step={1}
-                    defaultValue={product?.discount_threshold ?? ""}
-                    placeholder="e.g. 10"
-                    className="w-full h-10 px-3 bg-white border border-slate-200 rounded-lg text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-900 transition-all"
-                  />
+              {discountType !== "none" && (
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <FieldLabel>Min. Quantity</FieldLabel>
+                    <input
+                      type="number"
+                      name="discount_threshold"
+                      min={1}
+                      step={1}
+                      defaultValue={product?.discount_threshold ?? ""}
+                      placeholder="e.g. 10"
+                      className="w-full h-10 px-3 bg-white border border-slate-200 rounded-lg text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-900 transition-all"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <FieldLabel>
+                      {discountType === "percentage" ? "Discount (%)" : "Discount (R)"}
+                    </FieldLabel>
+                    <input
+                      type="number"
+                      name="discount_value"
+                      min={0}
+                      step="0.01"
+                      defaultValue={product?.discount_value ?? ""}
+                      placeholder={discountType === "percentage" ? "e.g. 15" : "e.g. 5.00"}
+                      className="w-full h-10 px-3 bg-white border border-slate-200 rounded-lg text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-900 transition-all"
+                    />
+                  </div>
                 </div>
-                <div className="space-y-1.5">
-                  <FieldLabel>Discount Value</FieldLabel>
-                  <input
-                    type="number"
-                    name="discount_value"
-                    min={0}
-                    step="0.01"
-                    defaultValue={product?.discount_value ?? ""}
-                    placeholder="e.g. 15"
-                    className="w-full h-10 px-3 bg-white border border-slate-200 rounded-lg text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-900 transition-all"
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Stock tracking */}
-            <div className="space-y-3 pt-2 border-t border-slate-100">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs font-semibold text-slate-700 uppercase tracking-wider">
-                    Track Stock
-                  </p>
-                  <p className="text-[11px] text-slate-400 mt-0.5">
-                    Enable inventory quantity tracking
-                  </p>
-                </div>
-                <input
-                  type="hidden"
-                  name="track_stock"
-                  value={product?.track_stock ? "true" : "false"}
-                />
-                <label className="relative inline-flex items-center cursor-pointer">
-                  <input
-                    type="checkbox"
-                    defaultChecked={product?.track_stock ?? false}
-                    onChange={(e) => {
-                      const hidden = e.currentTarget
-                        .closest("form")
-                        ?.querySelector<HTMLInputElement>('input[name="track_stock"]');
-                      if (hidden) hidden.value = e.currentTarget.checked ? "true" : "false";
-                    }}
-                    className="sr-only peer"
-                  />
-                  <div className="w-9 h-5 bg-slate-200 rounded-full peer-checked:bg-slate-900 transition-colors after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:after:translate-x-4" />
-                </label>
-              </div>
-
-              <div className="space-y-1.5">
-                <FieldLabel>Stock Quantity</FieldLabel>
-                <input
-                  type="number"
-                  name="stock_qty"
-                  min={0}
-                  step={1}
-                  defaultValue={product?.stock_qty ?? 0}
-                  className="w-full h-10 px-3 bg-white border border-slate-200 rounded-lg text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-900 transition-all"
-                />
-              </div>
+              )}
             </div>
 
             {/* Active toggle (edit mode only) */}

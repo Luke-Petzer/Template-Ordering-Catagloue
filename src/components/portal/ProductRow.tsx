@@ -61,17 +61,29 @@ export default function ProductRow({
       }}
     >
       {/* Thumbnail */}
-      <div className="w-[44px] h-[44px] bg-gray-50 border border-gray-100 rounded flex items-center justify-center overflow-hidden flex-shrink-0">
-        {primaryImageUrl ? (
-          <Image
-            src={primaryImageUrl}
-            alt={name}
-            width={44}
-            height={44}
-            className="object-cover w-full h-full"
-          />
-        ) : (
-          <Package className="w-5 h-5 text-gray-300" />
+      <div className="relative group w-fit flex-shrink-0">
+        <div className="w-[44px] h-[44px] bg-gray-50 border border-gray-100 rounded flex items-center justify-center overflow-hidden">
+          {primaryImageUrl ? (
+            <Image
+              src={primaryImageUrl}
+              alt={name}
+              width={44}
+              height={44}
+              className="object-cover w-full h-full"
+            />
+          ) : (
+            <Package className="w-5 h-5 text-gray-300" />
+          )}
+        </div>
+        {primaryImageUrl && (
+          <div className="absolute bottom-full left-0 mb-2 z-50 w-48 h-48 rounded-lg overflow-hidden shadow-xl border border-slate-200 opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-200">
+            <Image
+              src={primaryImageUrl}
+              alt={name}
+              fill
+              className="object-cover"
+            />
+          </div>
         )}
       </div>
 
