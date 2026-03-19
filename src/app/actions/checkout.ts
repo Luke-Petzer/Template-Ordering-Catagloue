@@ -113,6 +113,7 @@ async function dispatchFulfillmentEmails(
         orderDate: order.created_at,
         paymentMethod: paymentLabel as "EFT" | "30-Day Account",
         supplierName: config.business_name,
+        orderNotes: order.order_notes ?? null,
       }),
       attachments: [
         {
@@ -140,6 +141,7 @@ async function dispatchFulfillmentEmails(
         paymentMethod: paymentLabel as "EFT" | "30-Day Account",
         supplierName: config.business_name,
         supportEmail: config.support_email,
+        orderNotes: order.order_notes ?? null,
       }),
     });
     if (error) {
