@@ -84,8 +84,9 @@ export default async function PaymentPage({ searchParams }: PageProps) {
                 </span>
               </div>
 
-              <table className="w-full text-left border-collapse">
-                <thead>
+              <div className="w-full overflow-x-auto">
+                <table className="min-w-[500px] w-full text-left border-collapse">
+                  <thead>
                   <tr className="border-b border-gray-100">
                     <th className="px-6 py-3 text-[11px] font-semibold text-gray-400 uppercase tracking-wider">
                       SKU
@@ -119,7 +120,8 @@ export default async function PaymentPage({ searchParams }: PageProps) {
                     </tr>
                   ))}
                 </tbody>
-              </table>
+                </table>
+              </div>
 
               <div className="px-6 py-4 border-t border-gray-100 bg-gray-50/30 space-y-2">
                 <div className="flex justify-between text-sm">
