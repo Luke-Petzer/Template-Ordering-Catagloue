@@ -80,7 +80,7 @@ export default function AdminSidebar({ adminName, adminEmail, isSuperAdmin }: Ad
   }
 
   return (
-    <aside className="w-[250px] min-h-screen bg-slate-900 flex flex-col fixed left-0 top-0 bottom-0 z-30">
+    <aside className="hidden md:flex w-[250px] min-h-screen bg-slate-900 flex-col fixed left-0 top-0 bottom-0 z-30">
       {/* Logo */}
       <div className="h-16 flex items-center px-6 border-b border-slate-800">
         <div className="flex items-center gap-2">

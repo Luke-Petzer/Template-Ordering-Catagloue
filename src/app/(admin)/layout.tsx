@@ -4,6 +4,7 @@ import { adminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import AdminSidebar from "@/components/admin/AdminSidebar";
 import AdminLogoutButton from "@/components/admin/AdminLogoutButton";
+import AdminMobileNav from "@/components/admin/AdminMobileNav";
 import type { Route } from "next";
 
 export default async function AdminLayout({
@@ -39,13 +40,16 @@ export default async function AdminLayout({
       <AdminSidebar adminName={adminName} adminEmail={adminEmail} isSuperAdmin={isSuperAdmin} />
 
       {/* Main area */}
-      <div className="flex-1 ml-[250px] flex flex-col min-h-screen">
+      <div className="flex-1 md:ml-[250px] flex flex-col min-h-screen">
         {/* Top header */}
         <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-8 sticky top-0 z-20">
-          <p className="text-sm font-medium text-slate-700">
-            {adminName}
-            <span className="ml-2 text-[11px] font-normal text-slate-400">Admin</span>
-          </p>
+          <div className="flex items-center gap-4">
+            <AdminMobileNav adminName={adminName} isSuperAdmin={isSuperAdmin} />
+            <p className="text-sm font-medium text-slate-700">
+              {adminName}
+              <span className="ml-2 text-[11px] font-normal text-slate-400">Admin</span>
+            </p>
+          </div>
           <AdminLogoutButton variant="header" />
         </header>
 
