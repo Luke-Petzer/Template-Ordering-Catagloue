@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { ChevronDown, ChevronRight } from "lucide-react";
+import { useState, useTransition } from "react";
+import { ChevronDown, ChevronRight, Loader2 } from "lucide-react";
 import { reorderAction } from "@/app/actions/order";
 
 function StatusBadge({ status }: { status: string }) {
@@ -50,6 +50,18 @@ interface OrderHistoryTableProps {
 
 export default function OrderHistoryTable({ orders }: OrderHistoryTableProps) {
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [pendingId, setPendingId] = useState<string | null>(null);
+  const [, startTransition] = useTransition();
+
+  const handleReorder = (orderId: string) => {
+    setPendingId(orderId);
+    startTransition(async () => {
+      const fd = new FormData();
+      fd.set("orderId", orderId);
+      await reorderAction(fd);
+      setPendingId(null);
+    });
+  };
 
   const toggle = (id: string) =>
     setExpandedId((prev) => (prev === id ? null : id));
@@ -129,20 +141,23 @@ export default function OrderHistoryTable({ orders }: OrderHistoryTableProps) {
                 <span className="text-sm font-semibold text-slate-900">
                   {ZAR.format(order.total_amount)}
                 </span>
-                <form action={reorderAction}>
-                  <input type="hidden" name="orderId" value={order.id} />
-                  <button
-                    type="submit"
-                    className={[
-                      "text-[12px] font-bold px-4 py-2 rounded transition-colors",
-                      isExpanded
-                        ? "bg-slate-900 text-white hover:bg-slate-800"
-                        : "bg-gray-100 text-gray-700 hover:bg-gray-200",
-                    ].join(" ")}
-                  >
-                    Reorder
-                  </button>
-                </form>
+                <button
+                  type="button"
+                  onClick={() => handleReorder(order.id)}
+                  disabled={pendingId === order.id}
+                  className={[
+                    "text-[12px] font-bold px-4 py-2 rounded transition-colors disabled:opacity-60 disabled:cursor-not-allowed",
+                    isExpanded
+                      ? "bg-slate-900 text-white hover:bg-slate-800"
+                      : "bg-gray-100 text-gray-700 hover:bg-gray-200",
+                  ].join(" ")}
+                >
+                  {pendingId === order.id ? (
+                    <><Loader2 className="w-3 h-3 animate-spin mr-1 inline" />Adding...</>
+                  ) : (
+                    "Reorder"
+                  )}
+                </button>
               </div>
             </div>
 
@@ -176,20 +191,23 @@ export default function OrderHistoryTable({ orders }: OrderHistoryTableProps) {
                 {ZAR.format(order.total_amount)}
               </span>
               <div className="flex justify-end" onClick={(e) => e.stopPropagation()}>
-                <form action={reorderAction}>
-                  <input type="hidden" name="orderId" value={order.id} />
-                  <button
-                    type="submit"
-                    className={[
-                      "text-[12px] font-bold px-4 py-2 rounded transition-colors",
-                      isExpanded
-                        ? "bg-slate-900 text-white hover:bg-slate-800"
-                        : "bg-gray-100 text-gray-700 hover:bg-gray-200",
-                    ].join(" ")}
-                  >
-                    Reorder
-                  </button>
-                </form>
+                <button
+                  type="button"
+                  onClick={() => handleReorder(order.id)}
+                  disabled={pendingId === order.id}
+                  className={[
+                    "text-[12px] font-bold px-4 py-2 rounded transition-colors disabled:opacity-60 disabled:cursor-not-allowed",
+                    isExpanded
+                      ? "bg-slate-900 text-white hover:bg-slate-800"
+                      : "bg-gray-100 text-gray-700 hover:bg-gray-200",
+                  ].join(" ")}
+                >
+                  {pendingId === order.id ? (
+                    <><Loader2 className="w-3 h-3 animate-spin mr-1 inline" />Adding...</>
+                  ) : (
+                    "Reorder"
+                  )}
+                </button>
               </div>
             </div>
 
