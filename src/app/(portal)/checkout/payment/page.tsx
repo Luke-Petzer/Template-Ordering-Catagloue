@@ -74,7 +74,7 @@ export default async function PaymentPage({ searchParams }: PageProps) {
         <div className="grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-8">
           {/* Left — order summary */}
           <div className="md:col-span-7">
-            <div className="bg-white border border-gray-100 rounded-lg overflow-hidden shadow-sm mb-6">
+            <div className="bg-white border border-gray-100 rounded-lg shadow-sm mb-6">
               <div className="px-6 py-4 bg-gray-50/50 border-b border-gray-100 flex items-center justify-between">
                 <span className="text-sm font-semibold text-slate-900">
                   Order Summary
