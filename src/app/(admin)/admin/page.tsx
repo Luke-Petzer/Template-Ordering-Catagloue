@@ -229,7 +229,7 @@ export default async function AdminCommandCenterPage({ searchParams }: PageProps
           </select>
 
           {/* Date range */}
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <label className="text-xs text-slate-400 font-medium">From</label>
             <input
               type="date"
