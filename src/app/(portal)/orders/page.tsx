@@ -75,12 +75,12 @@ export default async function OrdersPage({ searchParams }: PageProps) {
           <h1 className="text-2xl font-semibold text-slate-900">
             Order History
           </h1>
-          <div className="flex items-center gap-3">
-            <button className="flex items-center gap-2 text-xs font-medium px-4 py-2 bg-white border border-gray-200 rounded hover:bg-gray-50 transition-colors text-gray-600">
+          <div className="grid grid-cols-2 gap-2 md:flex md:w-auto md:items-center md:gap-3">
+            <button className="flex justify-center items-center gap-2 text-xs font-medium px-4 py-2 bg-white border border-gray-200 rounded hover:bg-gray-50 transition-colors text-gray-600">
               <Filter className="w-4 h-4" />
               Filter
             </button>
-            <button className="flex items-center gap-2 text-xs font-medium px-4 py-2 bg-white border border-gray-200 rounded hover:bg-gray-50 transition-colors text-gray-600">
+            <button className="flex justify-center items-center gap-2 text-xs font-medium px-4 py-2 bg-white border border-gray-200 rounded hover:bg-gray-50 transition-colors text-gray-600">
               <Download className="w-4 h-4" />
               Export CSV
             </button>
