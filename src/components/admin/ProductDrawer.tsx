@@ -168,7 +168,7 @@ export default function ProductDrawer({
     <Sheet open={open} onOpenChange={handleOpenChange}>
       <SheetContent
         side="right"
-        className="w-[400px] sm:w-[400px] p-0 flex flex-col gap-0"
+        className="w-full sm:w-[400px] p-0 flex flex-col gap-0"
       >
         <SheetHeader className="h-16 px-6 border-b border-slate-100 flex flex-row items-center justify-between space-y-0">
           <SheetTitle className="text-lg font-semibold text-slate-900">
