@@ -63,8 +63,8 @@ export default async function AdminAuditPage({ searchParams }: PageProps) {
         </p>
       </div>
 
-      <div className="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
-        <table className="w-full text-left">
+      <div className="bg-white rounded-xl border border-slate-200 overflow-x-auto shadow-sm">
+        <table className="w-full min-w-[700px] text-left">
           <thead>
             <tr className="border-b border-slate-100 bg-slate-50/50">
               <th className="px-6 py-4 text-[11px] font-medium text-slate-400 uppercase tracking-wider">

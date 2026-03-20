@@ -355,7 +355,8 @@ export default function OrderLedger({
         </button>
       </div>
 
-      <table className="w-full">
+      <div className="w-full overflow-x-auto">
+      <table className="w-full min-w-[900px]">
         <thead>
           <tr className="border-b border-slate-100">
             <th className="w-10 px-6 py-3" />
@@ -432,6 +433,7 @@ export default function OrderLedger({
           )}
         </tbody>
       </table>
+      </div>
 
       {/* Pagination */}
       <div className="px-6 py-4 border-t border-slate-100 flex items-center justify-between">

@@ -120,8 +120,8 @@ export default function ClientsTable({
       </div>
 
       {/* Table */}
-      <div className="bg-white rounded-xl border border-slate-200 shadow-sm">
-        <table className="w-full text-left">
+      <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-x-auto">
+        <table className="w-full min-w-[800px] text-left">
           <thead>
             <tr className="border-b border-slate-100">
               <th className="px-6 py-4 text-[11px] font-medium text-slate-400 uppercase tracking-wider">
