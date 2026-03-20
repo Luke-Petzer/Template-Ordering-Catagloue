@@ -84,14 +84,14 @@ export default function ClientsTable({
   return (
     <>
       {/* Action bar */}
-      <div className="flex items-center justify-between mb-6 gap-4">
-        <form method="GET" className="flex items-center gap-4">
+      <div className="flex flex-wrap items-center justify-between mb-6 gap-4">
+        <form method="GET" className="flex flex-wrap items-center gap-4">
           <input
             type="text"
             name="search"
             defaultValue={search}
             placeholder="Search by name, account no., contact…"
-            className="h-9 w-72 px-3 bg-white border border-slate-200 rounded-lg text-sm text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900 transition-all"
+            className="h-9 w-full md:w-72 px-3 bg-white border border-slate-200 rounded-lg text-sm text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900 transition-all"
           />
           <button
             type="submit"
@@ -112,7 +112,7 @@ export default function ClientsTable({
         <button
           type="button"
           onClick={handleOpenCreate}
-          className="h-10 px-5 bg-slate-900 text-white rounded-lg text-sm font-medium flex items-center gap-2 hover:bg-slate-800 transition-colors shadow-sm flex-shrink-0"
+          className="h-10 px-5 bg-slate-900 text-white rounded-lg text-sm font-medium flex items-center justify-center gap-2 hover:bg-slate-800 transition-colors shadow-sm w-full md:w-auto"
         >
           <Plus className="w-4 h-4" />
           Add Client

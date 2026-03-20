@@ -70,7 +70,7 @@ export default function ProductsTable({
   return (
     <>
       {/* Table header */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-wrap items-center justify-between mb-6 gap-4">
         <p className="text-sm text-slate-500">
           {products.length} product{products.length !== 1 ? "s" : ""}
         </p>

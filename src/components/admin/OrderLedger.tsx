@@ -150,8 +150,8 @@ function ExpandedRow({
           </div>
 
           {/* Inner table */}
-          <div className="bg-white rounded-lg border border-slate-200 overflow-hidden">
-            <table className="w-full">
+          <div className="bg-white rounded-lg border border-slate-200 w-full max-w-full overflow-x-auto">
+            <table className="w-full min-w-[560px]">
               <thead>
                 <tr className="border-b border-slate-100">
                   <th className="text-left text-[11px] font-medium text-slate-400 uppercase tracking-wider px-4 py-2.5">
