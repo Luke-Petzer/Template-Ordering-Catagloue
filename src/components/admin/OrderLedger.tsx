@@ -324,7 +324,7 @@ export default function OrderLedger({
   };
 
   return (
-    <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+    <div className="bg-white rounded-xl border border-slate-200 overflow-x-auto">
       {/* Table header */}
       <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
         <div>
@@ -355,7 +355,6 @@ export default function OrderLedger({
         </button>
       </div>
 
-      <div className="w-full overflow-x-auto">
       <table className="w-full min-w-[900px]">
         <thead>
           <tr className="border-b border-slate-100">
@@ -433,7 +432,6 @@ export default function OrderLedger({
           )}
         </tbody>
       </table>
-      </div>
 
       {/* Pagination */}
       <div className="px-6 py-4 border-t border-slate-100 flex items-center justify-between">
