@@ -121,7 +121,7 @@ export default function SteelMatrixRow() {
     "w-full h-9 px-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-900 cursor-pointer transition-all";
 
   return (
-    <div className="bg-white border border-slate-200 rounded-2xl shadow-sm hover:shadow-md hover:border-slate-300 transition-all duration-200 px-4 py-3">
+    <div className="bg-white border border-slate-200 rounded-2xl shadow-sm hover:shadow-md hover:border-slate-300 transition-all duration-200 px-4 py-4">
       <div className="grid grid-cols-12 gap-4 items-center">
 
         {/* col-span-1 — Image */}
