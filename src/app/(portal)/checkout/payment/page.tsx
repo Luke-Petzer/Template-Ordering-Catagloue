@@ -153,7 +153,7 @@ export default async function PaymentPage({ searchParams }: PageProps) {
                 EFT Bank Details
               </p>
 
-              <div className="grid grid-cols-2 gap-y-5 gap-x-6">
+              <div className="grid grid-cols-2 gap-y-6 gap-x-6">
                 <div>
                   <p className="text-[11px] text-gray-400 mb-0.5">Bank</p>
                   <p className="text-[14px] font-medium text-slate-900">

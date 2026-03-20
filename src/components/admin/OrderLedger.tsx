@@ -200,7 +200,7 @@ function ExpandedRow({
 
           {/* Order Notes */}
           {order.order_notes && (
-            <div className="mt-4 bg-amber-50 border border-amber-100 rounded-lg p-3">
+            <div className="mt-4 bg-amber-50 border border-amber-100 rounded-lg p-4">
               <p className="text-[11px] font-semibold text-amber-700 uppercase tracking-wider mb-1">
                 Order Notes & Special Requests
               </p>
@@ -214,7 +214,7 @@ function ExpandedRow({
               Created: {fmtDate(order.created_at)} ·{" "}
               <span className="capitalize">{order.payment_method.replace(/_/g, " ")}</span>
             </span>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-4">
               {error && (
                 <span className="text-xs text-red-600">{error}</span>
               )}

@@ -63,11 +63,11 @@ export default function ProductRow({
      * mobile the wrappers act as normal flex rows that stack vertically.
      */
     <div
-      className="product-row flex flex-col gap-3 p-4 md:grid md:items-center md:px-4 md:py-3 md:gap-0"
+      className="product-row flex flex-col gap-4 p-4 md:grid md:items-center md:px-4 md:py-3 md:gap-0"
       style={{ gridTemplateColumns: "60px 140px 1fr 120px 140px 100px" }}
     >
       {/* ── Row 1 on mobile: thumbnail + name/sku/price ── */}
-      <div className="flex items-center gap-3 md:contents">
+      <div className="flex items-center gap-4 md:contents">
         {/* Thumbnail — grid col 1 */}
         <div className="relative group flex-shrink-0 w-fit">
           <div className="w-[44px] h-[44px] bg-gray-50 border border-gray-100 rounded flex items-center justify-center overflow-hidden">
@@ -130,7 +130,7 @@ export default function ProductRow({
       </div>
 
       {/* ── Row 2 on mobile: quantity + add button ── */}
-      <div className="flex items-center justify-between gap-3 md:contents">
+      <div className="flex items-center justify-between gap-4 md:contents">
         {/* Quantity — grid col 5 */}
         <div className="flex items-center">
           <QuantityStepper value={qty} onChange={setQty} />

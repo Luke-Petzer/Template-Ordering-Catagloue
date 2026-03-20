@@ -251,7 +251,7 @@ export default function CartReviewShell({ reorderItems }: CartReviewShellProps) 
 
             {/* Error message */}
             {error && (
-              <div className="mb-4 px-4 py-3 bg-red-50 border border-red-100 rounded text-[13px] text-red-700">
+              <div className="mb-4 px-4 py-4 bg-red-50 border border-red-100 rounded text-[13px] text-red-700">
                 {error}
               </div>
             )}
@@ -273,7 +273,7 @@ export default function CartReviewShell({ reorderItems }: CartReviewShellProps) 
               )}
             </button>
 
-            <div className="mt-6 flex items-start gap-3 p-3 bg-white/50 border border-slate-200 rounded text-[12px] text-gray-500">
+            <div className="mt-6 flex items-start gap-4 p-4 bg-white/50 border border-slate-200 rounded text-[12px] text-gray-500">
               <Info className="w-4 h-4 mt-0.5 flex-shrink-0 text-slate-400" />
               <p>
                 VAT is calculated at 15% and confirmed at checkout.

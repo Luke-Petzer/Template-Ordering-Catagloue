@@ -207,7 +207,7 @@ export default async function AdminCommandCenterPage({ searchParams }: PageProps
 
       {/* Action bar */}
       <div className="bg-white rounded-xl border border-slate-200 p-4 mb-6">
-        <form method="GET" className="flex flex-wrap items-center gap-3">
+        <form method="GET" className="flex flex-wrap items-center gap-4">
           {/* Search */}
           <input
             type="text"
