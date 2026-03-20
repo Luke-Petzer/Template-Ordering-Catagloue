@@ -7,7 +7,6 @@ import { Menu, X, LayoutDashboard, Package, Users, Settings, FileText, Bell, Box
 import type { Route } from "next";
 
 interface AdminMobileNavProps {
-  adminName: string;
   isSuperAdmin: boolean;
 }
 
@@ -23,7 +22,7 @@ const SYSTEM_NAV: { href: Route; label: string; icon: React.ReactNode; superAdmi
   { href: "/admin/audit" as Route, label: "Audit Log", icon: <FileText className="w-[18px] h-[18px]" /> },
 ];
 
-export default function AdminMobileNav({ adminName: _adminName, isSuperAdmin }: AdminMobileNavProps) {
+export default function AdminMobileNav({ isSuperAdmin }: AdminMobileNavProps) {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
 

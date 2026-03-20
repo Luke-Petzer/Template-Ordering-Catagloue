@@ -29,7 +29,8 @@
       "Bash(/bin/zsh -c \"source ~/.zshenv 2>/dev/null; source ~/.zprofile 2>/dev/null; source ~/.zshrc 2>/dev/null; which node npx 2>&1 || echo 'not found'\" 2>&1)",
       "Bash(/Users/lukepetzer/.nvm/versions/node/v22.14.0/bin/npx tsc:*)",
       "Bash(/Users/lukepetzer/Library/Caches/ms-playwright-go/1.50.1/node --version)",
-      "Bash(/Users/lukepetzer/Library/Caches/ms-playwright-go/1.50.1/node node_modules/.bin/tsc --noEmit)"
+      "Bash(/Users/lukepetzer/Library/Caches/ms-playwright-go/1.50.1/node node_modules/.bin/tsc --noEmit)",
+      "Bash(./node_modules/.bin/tsc --noEmit)"
     ]
   }
 }

@@ -42,9 +42,9 @@ export default async function AdminLayout({
       {/* Main area */}
       <div className="flex-1 md:ml-[250px] flex flex-col min-h-screen">
         {/* Top header */}
-        <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-8 sticky top-0 z-20">
+        <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-8 sticky top-0 z-50">
           <div className="flex items-center gap-4">
-            <AdminMobileNav adminName={adminName} isSuperAdmin={isSuperAdmin} />
+            <AdminMobileNav isSuperAdmin={isSuperAdmin} />
             <p className="text-sm font-medium text-slate-700">
               {adminName}
               <span className="ml-2 text-[11px] font-normal text-slate-400">Admin</span>
