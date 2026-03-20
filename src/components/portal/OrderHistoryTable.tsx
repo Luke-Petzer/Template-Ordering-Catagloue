@@ -58,8 +58,11 @@ export default function OrderHistoryTable({ orders }: OrderHistoryTableProps) {
     startTransition(async () => {
       const fd = new FormData();
       fd.set("orderId", orderId);
-      await reorderAction(fd);
-      setPendingId(null);
+      try {
+        await reorderAction(fd);
+      } finally {
+        setPendingId(null);
+      }
     });
   };
 
