@@ -51,7 +51,7 @@ export default async function ConfirmedPage({ searchParams }: PageProps) {
       <NavBar />
 
       {/* Main content */}
-      <main className="flex-1 flex flex-col items-center justify-center w-full px-6 py-12">
+      <main className="flex-1 flex flex-col items-center justify-center w-full px-4 md:px-8 py-12">
         {/* Cart clear on mount — client component */}
         <CartClearer />
 

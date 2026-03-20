@@ -54,7 +54,7 @@ export default async function AdminLayout({
         </header>
 
         {/* Page content */}
-        <main className="flex-1 min-w-0 overflow-y-scroll p-8">{children}</main>
+        <main className="flex-1 min-w-0 overflow-y-scroll p-4 md:p-8">{children}</main>
       </div>
     </div>
   );

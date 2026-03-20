@@ -69,7 +69,7 @@ export default async function OrdersPage({ searchParams }: PageProps) {
       <NavBar />
 
       <div className="flex-1 overflow-y-auto bg-[#fcfcfc]">
-      <main className="max-w-[1200px] w-full mx-auto px-8 pt-12 pb-24">
+      <main className="max-w-[1200px] w-full mx-auto px-4 md:px-8 pt-12 pb-24">
         {/* Page header */}
         <div className="flex items-center justify-between mb-8">
           <h1 className="text-2xl font-semibold text-slate-900">

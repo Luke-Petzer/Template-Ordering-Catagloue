@@ -30,7 +30,11 @@
       "Bash(/Users/lukepetzer/.nvm/versions/node/v22.14.0/bin/npx tsc:*)",
       "Bash(/Users/lukepetzer/Library/Caches/ms-playwright-go/1.50.1/node --version)",
       "Bash(/Users/lukepetzer/Library/Caches/ms-playwright-go/1.50.1/node node_modules/.bin/tsc --noEmit)",
-      "Bash(./node_modules/.bin/tsc --noEmit)"
+      "Bash(./node_modules/.bin/tsc --noEmit)",
+      "Bash(grep -r \"gap-3\\\\|p-3\\\\|py-3\\\\|px-3\" src/**/*.tsx --include=\"*.tsx\")",
+      "Bash(grep -rn \"gap-3\\\\|p-3\\\\|py-3\\\\|px-3\" src/**/*.tsx --include=\"*.tsx\")",
+      "Bash(/tmp/analyze_hits.txt:*)",
+      "Read(//tmp/**)"
     ]
   }
 }
