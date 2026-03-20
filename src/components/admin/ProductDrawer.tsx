@@ -196,7 +196,7 @@ export default function ProductDrawer({
                 onDragLeave={() => setIsDragging(false)}
                 onDrop={handleDrop}
                 onClick={() => fileInputRef.current?.click()}
-                className={`border-2 border-dashed rounded-xl p-6 flex flex-col items-center justify-center gap-3 cursor-pointer transition-colors ${
+                className={`border-2 border-dashed rounded-xl p-6 flex flex-col items-center justify-center gap-4 cursor-pointer transition-colors ${
                   isDragging
                     ? "border-slate-400 bg-slate-100"
                     : "border-slate-200 bg-slate-50/50 hover:bg-slate-50"
@@ -462,7 +462,7 @@ export default function ProductDrawer({
             {error && (
               <p className="text-xs text-red-600 mb-3">{error}</p>
             )}
-            <div className="flex gap-3">
+            <div className="flex gap-4">
               <button
                 type="button"
                 onClick={onClose}

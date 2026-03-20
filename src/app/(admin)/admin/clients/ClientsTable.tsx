@@ -85,7 +85,7 @@ export default function ClientsTable({
     <>
       {/* Action bar */}
       <div className="flex items-center justify-between mb-6 gap-4">
-        <form method="GET" className="flex items-center gap-3">
+        <form method="GET" className="flex items-center gap-4">
           <input
             type="text"
             name="search"

@@ -265,7 +265,7 @@ export default function SettingsForm({ config }: SettingsFormProps) {
             </p>
           )}
         </div>
-        <div className="flex items-center gap-3 flex-shrink-0">
+        <div className="flex items-center gap-4 flex-shrink-0">
           <button
             type="reset"
             onClick={() => {

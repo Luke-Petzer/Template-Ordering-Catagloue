@@ -26,7 +26,7 @@ export default function PaymentForm({ orderId, bankRef }: PaymentFormProps) {
   return (
     <div>
       {error && (
-        <div className="mb-4 px-4 py-3 bg-red-50 border border-red-100 rounded text-[13px] text-red-700">
+        <div className="mb-4 px-4 py-4 bg-red-50 border border-red-100 rounded text-[13px] text-red-700">
           {error}
         </div>
       )}

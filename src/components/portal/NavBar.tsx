@@ -34,7 +34,7 @@ export default function NavBar() {
       {/* Full-screen overlay while logout is in flight */}
       {isLoggingOut && (
         <div className="fixed inset-0 z-[100] bg-white/80 backdrop-blur-sm flex items-center justify-center">
-          <div className="flex flex-col items-center gap-3">
+          <div className="flex flex-col items-center gap-4">
             <Loader2 className="w-8 h-8 text-slate-900 animate-spin" />
             <p className="text-sm font-medium text-slate-600">
               Logging out safely...
@@ -78,7 +78,7 @@ export default function NavBar() {
         </div>
 
         {/* Right — cart icon (mobile/tablet) + logout (desktop) + hamburger (mobile) */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-4">
           {/* Cart icon — visible below lg where CartSidebar is hidden */}
           <Link
             href={"/cart" as Route}
@@ -125,7 +125,7 @@ export default function NavBar() {
       {/* Mobile dropdown menu */}
       {isMobileMenuOpen && (
         <div className="md:hidden bg-white border-b border-gray-100 shadow-sm z-40">
-          <div className="flex flex-col px-8 py-4 gap-3">
+          <div className="flex flex-col px-8 py-4 gap-4">
             {NAV_LINKS.map(({ href, label }) => {
               const isActive = pathname === href || pathname.startsWith(href + "/");
               return (

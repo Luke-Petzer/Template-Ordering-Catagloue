@@ -104,7 +104,7 @@ export default function AdminSidebar({ adminName, adminEmail, isSuperAdmin }: Ad
           <Link
             key={href}
             href={href}
-            className={`flex items-center gap-3 px-3 py-2.5 rounded-lg mb-1 transition-all text-sm font-medium ${
+            className={`flex items-center gap-4 px-3 py-2.5 rounded-lg mb-1 transition-all text-sm font-medium ${
               isActive(href)
                 ? "bg-slate-800 text-white"
                 : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/50"
@@ -125,7 +125,7 @@ export default function AdminSidebar({ adminName, adminEmail, isSuperAdmin }: Ad
           <Link
             key={href}
             href={href}
-            className={`flex items-center gap-3 px-3 py-2.5 rounded-lg mb-1 transition-all text-sm font-medium ${
+            className={`flex items-center gap-4 px-3 py-2.5 rounded-lg mb-1 transition-all text-sm font-medium ${
               isActive(href)
                 ? "bg-slate-800 text-white"
                 : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/50"
@@ -139,7 +139,7 @@ export default function AdminSidebar({ adminName, adminEmail, isSuperAdmin }: Ad
 
       {/* Footer */}
       <div className="p-4 border-t border-slate-800">
-        <div className="flex items-center gap-3 px-2">
+        <div className="flex items-center gap-4 px-2">
           <div className="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center text-xs text-slate-300 font-medium flex-shrink-0">
             {initials(adminName)}
           </div>

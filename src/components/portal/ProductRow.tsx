@@ -63,7 +63,7 @@ export default function ProductRow({
      * mobile the wrappers act as normal flex rows that stack vertically.
      */
     <div
-      className="product-row flex flex-col gap-4 p-4 md:grid md:items-center md:px-4 md:py-3 md:gap-0"
+      className="product-row flex flex-col gap-4 p-4 md:grid md:items-center md:px-4 md:py-4 md:gap-0"
       style={{ gridTemplateColumns: "60px 140px 1fr 120px 140px 100px" }}
     >
       {/* ── Row 1 on mobile: thumbnail + name/sku/price ── */}

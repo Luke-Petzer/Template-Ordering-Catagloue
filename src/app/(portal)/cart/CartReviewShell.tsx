@@ -88,7 +88,7 @@ export default function CartReviewShell({ reorderItems }: CartReviewShellProps) 
           ) : (
             <div>
               {/* Desktop header row — hidden on mobile */}
-              <div className="hidden md:grid md:grid-cols-[1fr_2fr_1fr_1fr_1fr_48px] bg-slate-50 border-b border-gray-100 px-6 py-3">
+              <div className="hidden md:grid md:grid-cols-[1fr_2fr_1fr_1fr_1fr_48px] bg-slate-50 border-b border-gray-100 px-6 py-4">
                 <span className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Product SKU</span>
                 <span className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Description</span>
                 <span className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Unit Price</span>

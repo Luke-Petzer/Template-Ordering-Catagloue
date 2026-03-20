@@ -323,7 +323,7 @@ export default function ClientDrawer({
             )}
 
             {/* Info notice */}
-            <div className="flex gap-3 p-4 bg-blue-50/50 border border-blue-100/50 rounded-lg">
+            <div className="flex gap-4 p-4 bg-blue-50/50 border border-blue-100/50 rounded-lg">
               <Info className="w-4 h-4 text-blue-500 mt-0.5 flex-shrink-0" />
               <div>
                 <p className="text-xs font-medium text-blue-900">Login credentials</p>
@@ -339,7 +339,7 @@ export default function ClientDrawer({
             {error && (
               <p className="text-xs text-red-600 mb-3">{error}</p>
             )}
-            <div className="flex gap-3">
+            <div className="flex gap-4">
               <button
                 type="button"
                 onClick={onClose}

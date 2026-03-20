@@ -37,7 +37,7 @@ interface CatalogueShellProps {
 /** Desktop-only table column headers */
 function TableHeader() {
   return (
-    <div className="hidden md:grid items-center px-4 py-3 border-b border-gray-100 bg-gray-50/50"
+    <div className="hidden md:grid items-center px-4 py-4 border-b border-gray-100 bg-gray-50/50"
       style={{ gridTemplateColumns: "60px 140px 1fr 120px 140px 100px" }}
     >
       <span className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">

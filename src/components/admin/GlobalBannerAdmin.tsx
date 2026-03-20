@@ -39,7 +39,7 @@ export default function GlobalBannerAdmin({
 
   return (
     <div className="bg-white rounded-xl border border-slate-200 p-6 space-y-6">
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-4">
         <div className="w-10 h-10 rounded-lg bg-amber-50 border border-amber-100 flex items-center justify-center">
           {isActive ? (
             <Bell className="w-5 h-5 text-amber-600" />

@@ -230,7 +230,7 @@ export default function OrderHistoryTable({ orders }: OrderHistoryTableProps) {
                   {order.items.map((item) => (
                     <div key={item.id}>
                       {/* Mobile card */}
-                      <div className="md:hidden px-4 py-3 flex flex-col gap-1">
+                      <div className="md:hidden px-4 py-4 flex flex-col gap-1">
                         <p className="text-sm font-semibold text-slate-900">{item.product_name}</p>
                         <p className="text-xs text-gray-400">{item.sku}</p>
                         <div className="flex justify-between items-center mt-1">
@@ -240,7 +240,7 @@ export default function OrderHistoryTable({ orders }: OrderHistoryTableProps) {
                       </div>
 
                       {/* Desktop row */}
-                      <div className="hidden md:grid grid-cols-[1fr_2fr_1fr_80px_100px] items-center px-4 py-3">
+                      <div className="hidden md:grid grid-cols-[1fr_2fr_1fr_80px_100px] items-center px-4 py-4">
                         <span className="text-[13px] font-medium text-slate-900">{item.sku}</span>
                         <span className="text-[13px] text-gray-500">{item.product_name}</span>
                         <span className="text-[13px] text-gray-500">{ZAR.format(item.unit_price)}</span>
