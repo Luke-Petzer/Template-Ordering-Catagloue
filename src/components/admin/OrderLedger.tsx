@@ -324,7 +324,7 @@ export default function OrderLedger({
   };
 
   return (
-    <div className="bg-white rounded-xl border border-slate-200 overflow-x-auto">
+    <div className="bg-white rounded-xl border border-slate-200 w-full max-w-full overflow-x-auto">
       {/* Table header */}
       <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
         <div>

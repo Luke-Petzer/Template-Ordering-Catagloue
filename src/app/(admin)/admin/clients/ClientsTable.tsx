@@ -120,7 +120,7 @@ export default function ClientsTable({
       </div>
 
       {/* Table */}
-      <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-x-auto">
+      <div className="bg-white rounded-xl border border-slate-200 shadow-sm w-full max-w-full overflow-x-auto">
         <table className="w-full min-w-[800px] text-left">
           <thead>
             <tr className="border-b border-slate-100">
