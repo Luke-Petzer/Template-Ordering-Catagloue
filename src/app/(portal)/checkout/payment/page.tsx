@@ -204,7 +204,7 @@ export default async function PaymentPage({ searchParams }: PageProps) {
             </div>
 
             {/* Important notice */}
-            <div className="flex items-start gap-3 p-4 bg-amber-50 border border-amber-100 rounded-lg mb-6 text-[12px] text-amber-800">
+            <div className="flex items-start gap-4 p-4 bg-amber-50 border border-amber-100 rounded-lg mb-6 text-[12px] text-amber-800">
               <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0 text-amber-500" />
               <p>
                 Use <strong>{bankRef}</strong> as your payment reference so we

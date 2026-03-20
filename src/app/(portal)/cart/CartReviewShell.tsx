@@ -113,7 +113,7 @@ export default function CartReviewShell({ reorderItems }: CartReviewShellProps) 
                 return (
                   <div key={item.productId} className="border-b border-gray-100 last:border-b-0">
                     {/* Mobile card — block on mobile, hidden on md+ */}
-                    <div className="md:hidden p-4 flex flex-col gap-3">
+                    <div className="md:hidden p-4 flex flex-col gap-4">
                       {/* Name + SKU */}
                       <div>
                         <p className="text-sm font-semibold text-slate-900">{item.name}</p>
